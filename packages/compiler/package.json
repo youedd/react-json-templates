@@ -1,0 +1,14 @@
+{
+  "name": "@react-json-template/compiler",
+  "version": "0.0.1",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@babel/parser": "^7.21.4",
+    "@babel/traverse": "^7.21.4"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.7",
+    "debug": "^4.3.4"
+  }
+}
