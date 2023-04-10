@@ -1,8 +1,13 @@
 import { analyser } from './analyser'
-import type { RJTAnalyserResult } from './types'
+import type { RJTAnalyserResult, RJTCompilerConfig } from './types'
 
 const assert = (code: string, expected: RJTAnalyserResult['exports']): void => {
-  const result = analyser(code)
+  const config: RJTCompilerConfig = {
+    sourceType: "module",
+    plugins: ["jsx", "typescript"]
+  }
+
+  const result = analyser(code, config)
 
   expect(result.exports).toEqual(expected)
 }
@@ -21,10 +26,10 @@ describe('analyser', () => {
       `
       import {Serializable as Serializable} from 'react-json-templates'
 
-      export default Serializable(() => null);
+      export default Serializable("s1",() => null);
       `,
       {
-        default: 'Serializable'
+        default: { type: 'Serializable', name: "s1" }
       }
     )
 
@@ -32,10 +37,10 @@ describe('analyser', () => {
       `
       import {Serializable as _Serializable} from 'react-json-templates'
 
-      export default _Serializable(() => null);
+      export default _Serializable("s1", () => null);
       `,
       {
-        default: 'Serializable'
+        default: { type: 'Serializable', name: "s1" }
       }
     )
   })
@@ -48,7 +53,7 @@ describe('analyser', () => {
       export default Template(() => null);
       `,
       {
-        default: 'Template'
+        default: { type: 'Template' }
       }
     )
 
@@ -59,7 +64,7 @@ describe('analyser', () => {
       export default _Template(() => null);
       `,
       {
-        default: 'Template'
+        default: { type: 'Template' }
       }
     )
   })
@@ -74,7 +79,7 @@ describe('analyser', () => {
       export default variable
       `,
       {
-        default: 'Template'
+        default: { type: 'Template' }
       }
     )
 
@@ -84,12 +89,12 @@ describe('analyser', () => {
     
       let variable = Template(() => null)
 
-      variable = Serializable(() => null)
+      variable = Serializable("s1", () => null)
 
       export default variable
       `,
       {
-        default: 'Serializable'
+        default: { type: 'Serializable', name: "s1" }
       }
     )
 
@@ -99,12 +104,12 @@ describe('analyser', () => {
     
       let variable = () => null
 
-      variable = Serializable(() => null)
+      variable = Serializable("s1", () => null)
   
       export default variable
       `,
       {
-        default: 'Serializable'
+        default: { type: 'Serializable', name: "s1" }
       }
     )
   })
@@ -123,7 +128,7 @@ describe('analyser', () => {
       export default variable
       `,
       {
-        default: 'Template'
+        default: { type: 'Template' }
       }
     )
 
@@ -218,7 +223,7 @@ describe('analyser', () => {
       export const t1 = Template(() => null)
       `,
       {
-        t1: 'Template'
+        t1: { type: 'Template' }
       }
     )
 
@@ -231,7 +236,7 @@ describe('analyser', () => {
       export { t1 }
       `,
       {
-        t1: 'Template'
+        t1: { type: 'Template' }
       }
     )
 
@@ -244,7 +249,7 @@ describe('analyser', () => {
       export { _t1 as t1 }
       `,
       {
-        t1: 'Template'
+        t1: { type: 'Template' }
       }
     )
   })
@@ -254,10 +259,10 @@ describe('analyser', () => {
       `
       import {Template, Serializable} from 'react-json-templates'
     
-      export const s1 = Serializable(() => null)
+      export const s1 = Serializable("s1", () => null)
       `,
       {
-        s1: 'Serializable'
+        s1: { type: 'Serializable', name: "s1" }
       }
     )
 
@@ -265,12 +270,12 @@ describe('analyser', () => {
       `
       import {Template, Serializable} from 'react-json-templates'
     
-      const s1 = Serializable(() => null)
+      const s1 = Serializable("s1", () => null)
 
       export { s1 }
       `,
       {
-        s1: 'Serializable'
+        s1: { type: 'Serializable', name: "s1" }
       }
     )
 
@@ -278,12 +283,12 @@ describe('analyser', () => {
       `
       import {Template, Serializable} from 'react-json-templates'
     
-      const _s1 = Serializable(() => null)
+      const _s1 = Serializable("s1", () => null)
 
       export { _s1 as s1 }
       `,
       {
-        s1: 'Serializable'
+        s1: { type: 'Serializable', name: "s1" }
       }
     )
   })
@@ -298,7 +303,7 @@ describe('analyser', () => {
       export const t1 = variable
       `,
       {
-        t1: 'Template'
+        t1: { type: 'Template' }
       }
     )
 
@@ -306,14 +311,14 @@ describe('analyser', () => {
       `
       import {Template, Serializable} from 'react-json-templates'
     
-      let variable = Serializable(() => null)
+      let variable = Serializable("_s1", () => null)
 
-      variable = Serializable(() => null)
+      variable = Serializable("s1", () => null)
 
       export const s1 = variable
       `,
       {
-        s1: 'Serializable'
+        s1: { type: 'Serializable', name: "s1" }
       }
     )
 
@@ -323,12 +328,12 @@ describe('analyser', () => {
     
       let variable = () => null
 
-      variable = Serializable(() => null)
+      variable = Serializable("s1", () => null)
   
       export const s1 = variable
       `,
       {
-        s1: 'Serializable'
+        s1: { type: 'Serializable', name: "s1" }
       }
     )
 
@@ -338,14 +343,14 @@ describe('analyser', () => {
     
       let variable = () => null
 
-      variable = Serializable(() => null)
+      variable = Serializable("s1", () => null)
 
       const s1 = variable
 
       export { s1 }
       `,
       {
-        s1: 'Serializable'
+        s1: { type: 'Serializable', name: "s1" }
       }
     )
   })
@@ -364,7 +369,7 @@ describe('analyser', () => {
       export { variable as t1 }
       `,
       {
-        t1: 'Template'
+        t1: { type: 'Template' }
       }
     )
 
@@ -375,7 +380,7 @@ describe('analyser', () => {
       let variable = Template(() => null)
 
       if(cond) {
-        variable = Serializable(() => null)
+        variable = Serializable("s1", () => null)
       }
   
       export { variable as n1 }
@@ -432,7 +437,7 @@ describe('analyser', () => {
       `
       import {Template, Serializable} from 'react-json-templates'
 
-      export const s1 = Serializable(() => null)
+      export const s1 = Serializable("s1", () => null)
 
       export const t1 = Template(()=> null)
 
@@ -447,10 +452,10 @@ describe('analyser', () => {
       export default Template(()=> null)
       `,
       {
-        s1: 'Serializable',
-        s2: 'Serializable',
-        t1: 'Template',
-        default: 'Template'
+        s1: { type: 'Serializable', name: "s1" },
+        s2: { type: 'Serializable', name: "s1" },
+        t1: { type: 'Template' },
+        default: { type: 'Template' }
       }
     )
   })

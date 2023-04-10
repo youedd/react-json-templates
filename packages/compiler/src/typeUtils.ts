@@ -1,8 +1,10 @@
 import { NodePath } from "@babel/traverse"
 import * as types from "@babel/types"
-import { RJTType } from "./types"
+import { RJTComponentType, RJTType } from "./types"
 
-export const getIdentifierPossibleTypes = (path: NodePath<types.Identifier>): Array<RJTType | null> => {
+export const getIdentifierPossibleTypes = (
+  path: NodePath<types.Identifier | types.JSXIdentifier>
+): Array<RJTComponentType | null> => {
   const binding = path.scope.getBinding(path.node.name)
 
   if (binding == null || !binding?.path.isVariableDeclarator()) {
@@ -14,19 +16,19 @@ export const getIdentifierPossibleTypes = (path: NodePath<types.Identifier>): Ar
     ...binding.constantViolations
   ]
 
-  const possibleTypes = new Set<RJTType | null>()
+  const possibleTypes: Array<RJTComponentType | null> = []
 
   for (let i = rightValues.length - 1; i >= 0; i--) {
     const valuePath = rightValues[i]
 
     if (valuePath.isVariableDeclarator()) {
       const init = valuePath.get('init')
-      possibleTypes.add(getRJTTypeFromPath(init))
+      possibleTypes.push(getRJTTypeFromPath(init))
     } else if (valuePath.isAssignmentExpression()) {
       const rVal = valuePath.get('right')
-      possibleTypes.add(getRJTTypeFromPath(rVal))
+      possibleTypes.push(getRJTTypeFromPath(rVal))
     } else {
-      possibleTypes.add(null)
+      possibleTypes.push(null)
     }
 
     if (!isConditional(valuePath)) {
@@ -34,10 +36,25 @@ export const getIdentifierPossibleTypes = (path: NodePath<types.Identifier>): Ar
     }
   }
 
-  return Array.from(possibleTypes)
+  return possibleTypes
+    .filter((item, index, self) => {
+      const isFirstOccurrence = index === self.findIndex(i => {
+        if (item?.type === 'Template') {
+          return i?.type === 'Template'
+        }
+
+        if (item?.type === 'Serializable') {
+          return i?.type === 'Serializable' && i?.name === item.name
+        }
+
+        return i === null
+      })
+
+      return isFirstOccurrence
+    })
 }
 
-export const getRJTTypeFromPath = (path: NodePath<any>): RJTType | null => {
+export const getRJTTypeFromPath = (path: NodePath<any>): RJTComponentType | null => {
   if (path.isCallExpression()) {
     return getRJTTypeFromCallExpression(path)
   }
@@ -49,7 +66,7 @@ export const getRJTTypeFromPath = (path: NodePath<any>): RJTType | null => {
   return null
 }
 
-const getRJTTypeFromCallExpression = (path: NodePath<types.CallExpression>): RJTType | null => {
+const getRJTTypeFromCallExpression = (path: NodePath<types.CallExpression>): RJTComponentType | null => {
   const callee = path.get('callee')
 
   if (!callee.isIdentifier()) {
@@ -63,10 +80,29 @@ const getRJTTypeFromCallExpression = (path: NodePath<types.CallExpression>): RJT
     return null
   }
 
-  return getRJTTypeFromImportSpecifier(binding?.path)
+  const type = getRJTTypeFromImportSpecifier(binding?.path)
+
+
+  if (type === "Template") {
+    return { type }
+  }
+
+  if (type === "Serializable") {
+
+    const name = path.get('arguments')[0]
+
+    if (name != null && name.isStringLiteral()) {
+      return {
+        type,
+        name: name.node.value
+      }
+    }
+  }
+
+  return null
 }
 
-const getRJTTypeFromIdentifier = (path: NodePath<types.Identifier>): RJTType | null => {
+const getRJTTypeFromIdentifier = (path: NodePath<types.Identifier>): RJTComponentType | null => {
   const possibleTypes = getIdentifierPossibleTypes(path)
 
   return possibleTypes.length === 1
