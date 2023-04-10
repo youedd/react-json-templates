@@ -1,8 +1,8 @@
 import traverse, { NodePath } from '@babel/traverse';
 import { parse } from '@babel/parser';
-import { ImportSpecifier, CallExpression, Identifier, Expression } from '@babel/types'
+import { ImportSpecifier, CallExpression, Identifier } from '@babel/types'
 
-type ExportType = "Unknown" | "Template" | "Serializable"
+type ExportType = "Template" | "Serializable"
 export type AnalyserResult = {
   exports: Record<string, ExportType>,
 }
@@ -10,6 +10,14 @@ export type AnalyserResult = {
 export const analyser = (code: string): AnalyserResult => {
 
   const result: AnalyserResult = { exports: {} }
+
+  const setExportType = (key: string, value: ExportType | null) => {
+    if (!value) {
+      return
+    }
+
+    result.exports[key] = value
+  }
 
   const ast = parse(
     code,
@@ -20,19 +28,55 @@ export const analyser = (code: string): AnalyserResult => {
   traverse(
     ast,
     {
-      ExportDeclaration(path) {
+      ExportNamedDeclaration(path) {
 
+        const declaration = path.get("declaration")
+
+        if (declaration.isVariableDeclaration()) {
+          declaration.get("declarations").forEach(declarator => {
+            const lVal = declarator.get("id")
+            const rVal = declarator.get("init")
+
+            if (!lVal.isIdentifier()) {
+              return
+            }
+
+            const name = lVal.node.name
+
+            const exportType = getExportTypeFromNode(rVal)
+            setExportType(name, exportType)
+          })
+        }
+
+        const specifiers = path.get("specifiers")
+
+        specifiers.forEach(specifier => {
+          if (!specifier.isExportSpecifier()) {
+            return
+          }
+
+          const local = specifier.get('local')
+          const exported = specifier.get("exported") as NodePath<Identifier>
+
+          const name = exported.node.name
+
+          const exportType = getExportTypeFromIdentifier(local)
+          setExportType(name, exportType)
+
+        })
       },
       ExportDefaultDeclaration(path) {
         const declaration = path.get("declaration")
-        result.exports.default = getExportTypeFromDeclaration(declaration)
+
+        const exportType = getExportTypeFromNode(declaration)
+        setExportType("default", exportType)
       }
     }
   );
   return result
 }
 
-const getExportTypeFromDeclaration = (path: NodePath): ExportType => {
+const getExportTypeFromNode = (path: NodePath<any>): ExportType | null => {
   if (path.isCallExpression()) {
     return getExportTypeFromCallExpression(path)
   }
@@ -41,85 +85,46 @@ const getExportTypeFromDeclaration = (path: NodePath): ExportType => {
     return getExportTypeFromIdentifier(path)
   }
 
-  return "Unknown"
+  return null
 }
 
-const getExportTypeFromCallExpression = (path: NodePath<CallExpression>) => {
+const getExportTypeFromCallExpression = (path: NodePath<CallExpression>): ExportType | null => {
 
   const callee = path.get("callee")
 
   if (!callee.isIdentifier()) {
-    return "Unknown"
+    return null
   }
 
   const name = callee.node.name
   const binding = callee.scope.getBinding(name)
 
   if (!binding?.path.isImportSpecifier()) {
-    return "Unknown"
+    return null
   }
 
   return getImportSpecifierType(binding?.path)
 }
 
-const getExportTypeFromIdentifier = (path: NodePath<Identifier>): ExportType => {
-  const binding = path.scope.getBinding(path.node.name)
+const getExportTypeFromIdentifier = (path: NodePath<Identifier>): ExportType | null => {
+  const possibleTypes = getIdentifierPossibleTypes(path)
 
-  if (!binding?.path.isVariableDeclarator()) {
-    return "Unknown"
-  }
-
-  const rightValues = [
-    binding.path.get("init"),
-    ...binding.constantViolations
-  ]
-
-  const possibleTypes = new Set<ExportType>()
-
-  for (let i = rightValues.length - 1; i >= 0; i--) {
-    const valuePath = rightValues[i];
-
-    if (valuePath.isCallExpression()) {
-      possibleTypes.add(getExportTypeFromCallExpression(valuePath))
-    }
-
-    else if (valuePath.isAssignmentExpression()) {
-      const rVal = valuePath.get("right")
-
-      possibleTypes.add(
-        rVal.isCallExpression()
-          ? getExportTypeFromCallExpression(rVal)
-          : "Unknown"
-      )
-    }
-
-    else {
-      possibleTypes.add("Unknown")
-    }
-
-
-    if (!isConditional(valuePath)) {
-      break;
-    }
-  }
-
-  return possibleTypes.size === 1
-    ? Array.from(possibleTypes)[0]
-    : "Unknown"
+  return possibleTypes.length === 1
+    ? possibleTypes[0]
+    : null
 }
 
-const getImportSpecifierType = (path: NodePath<ImportSpecifier>): ExportType => {
+const getImportSpecifierType = (path: NodePath<ImportSpecifier>): ExportType | null => {
   const imported = path.get('imported')
 
   if (!imported.isIdentifier()) {
-    return "Unknown"
+    return null
   }
 
   return ["Template", "Serializable"].includes(imported.node.name)
     ? imported.node.name as ExportType
-    : "Unknown"
+    : null
 }
-
 
 const isConditional = (path: NodePath<any> | null): boolean => {
   if (!path) {
@@ -131,4 +136,41 @@ const isConditional = (path: NodePath<any> | null): boolean => {
   }
 
   return isConditional(path.parentPath)
+}
+
+const getIdentifierPossibleTypes = (path: NodePath<Identifier>): Array<ExportType | null> => {
+  const binding = path.scope.getBinding(path.node.name)
+
+  if (!binding?.path.isVariableDeclarator()) {
+    return []
+  }
+
+  const rightValues = [
+    binding.path,
+    ...binding.constantViolations
+  ]
+
+  const possibleTypes = new Set<ExportType | null>()
+
+  for (let i = rightValues.length - 1; i >= 0; i--) {
+    const valuePath = rightValues[i];
+
+    if (valuePath.isVariableDeclarator()) {
+      const init = valuePath.get("init")
+      possibleTypes.add(getExportTypeFromNode(init))
+    }
+    else if (valuePath.isAssignmentExpression()) {
+      const rVal = valuePath.get("right")
+      possibleTypes.add(getExportTypeFromNode(rVal))
+    }
+    else {
+      possibleTypes.add(null)
+    }
+
+    if (!isConditional(valuePath)) {
+      break;
+    }
+  }
+
+  return Array.from(possibleTypes)
 }

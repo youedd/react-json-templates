@@ -11,11 +11,10 @@ const assert = (code: string, expected: AnalyserResult['exports']) => {
 
 describe("analyser", () => {
 
-  it('should detect default unknown exports', () => {
+  it('should not detect default unknown exports', () => {
     assert(
       `export default 5;`,
       {
-        default: 'Unknown'
       }
     )
   })
@@ -68,7 +67,7 @@ describe("analyser", () => {
     )
   })
 
-  it('should detect default export variables type', () => {
+  it('should detect default variables export type', () => {
     assert(
       `
       import {Template} from 'react-json-templates'
@@ -113,7 +112,7 @@ describe("analyser", () => {
     )
   })
 
-  it('should return unknown for default export variables with conditional type', () => {
+  it('should not detect default variables export with conditional type', () => {
 
     assert(
       `
@@ -145,7 +144,6 @@ describe("analyser", () => {
       export default variable
       `,
       {
-        default: 'Unknown'
       }
     )
 
@@ -160,7 +158,6 @@ describe("analyser", () => {
       export default variable
       `,
       {
-        default: 'Unknown'
       }
     )
 
@@ -177,40 +174,289 @@ describe("analyser", () => {
       export default variable
       `,
       {
-        default: 'Unknown'
       }
     )
   })
 
+  it('should not detect named unknown exports', () => {
+    assert(
+      `
+      import {Template, Serializable} from 'react-json-templates'
+    
+      export const n1 = () => null
+      `,
+      {
+      }
+    )
 
+    assert(
+      `
+      import {Template, Serializable} from 'react-json-templates'
+    
+      const n1 = () => null
 
-  // const code = `
-  // import {Template, Serializable} from 'react-json-templates'
+      export { n1 }
+      `,
+      {
+      }
+    )
 
-  // export const s1 = Serializable(() => null)
+    assert(
+      `
+      import {Template, Serializable} from 'react-json-templates'
+    
+      const _n1 = () => null
 
-  // export const t1 = Template(()=> null)
+      export { _n1 as n1 }
+      `,
+      {
+      }
+    )
+  })
 
-  // const n1 = 5
+  it('should detect named Template exports', () => {
+    assert(
+      `
+      import {Template, Serializable} from 'react-json-templates'
+    
+      export const t1 = Template(() => null)
+      `,
+      {
+        t1: 'Template'
+      }
+    )
 
-  // export const s2 = s1
+    assert(
+      `
+      import {Template, Serializable} from 'react-json-templates'
+    
+      const t1 = Template(() => null)
 
-  // export const n2 = Serializable
+      export { t1 }
+      `,
+      {
+        t1: 'Template'
+      }
+    )
 
-  // export const s3=  n2(() => null)
+    assert(
+      `
+      import {Template, Serializable} from 'react-json-templates'
+    
+      const _t1 = Template(() => null)
 
-  // export default Template(()=> null)
-  // `
+      export { _t1 as t1 }
+      `,
+      {
+        t1: 'Template'
+      }
+    )
+  })
 
-  // const result = analyser(code)
+  it('should detect named Serializable exports', () => {
+    assert(
+      `
+      import {Template, Serializable} from 'react-json-templates'
+    
+      export const s1 = Serializable(() => null)
+      `,
+      {
+        s1: 'Serializable'
+      }
+    )
 
-  // expect(result.exports).toEqual({
-  //   s1: 'Serializable',
-  //   s2: 'Serializable',
-  //   s3: 'Serializable',
-  //   t1: 'Template',
-  //   n1: 'Unknown',
-  //   n2: 'Unknown',
-  //   default: 'Template'
+    assert(
+      `
+      import {Template, Serializable} from 'react-json-templates'
+    
+      const s1 = Serializable(() => null)
+
+      export { s1 }
+      `,
+      {
+        s1: 'Serializable'
+      }
+    )
+
+    assert(
+      `
+      import {Template, Serializable} from 'react-json-templates'
+    
+      const _s1 = Serializable(() => null)
+
+      export { _s1 as s1 }
+      `,
+      {
+        s1: 'Serializable'
+      }
+    )
+  })
+
+  it('should detect named variables export type', () => {
+    assert(
+      `
+      import {Template} from 'react-json-templates'
+    
+      const variable = Template(() => null)
+  
+      export const t1 = variable
+      `,
+      {
+        t1: 'Template'
+      }
+    )
+
+    assert(
+      `
+      import {Template, Serializable} from 'react-json-templates'
+    
+      let variable = Serializable(() => null)
+
+      variable = Serializable(() => null)
+
+      export const s1 = variable
+      `,
+      {
+        s1: 'Serializable'
+      }
+    )
+
+    assert(
+      `
+      import {Template, Serializable} from 'react-json-templates'
+    
+      let variable = () => null
+
+      variable = Serializable(() => null)
+  
+      export const s1 = variable
+      `,
+      {
+        s1: 'Serializable'
+      }
+    )
+
+    assert(
+      `
+      import {Template, Serializable} from 'react-json-templates'
+    
+      let variable = () => null
+
+      variable = Serializable(() => null)
+
+      const s1 = variable
+
+      export { s1 }
+      `,
+      {
+        s1: 'Serializable'
+      }
+    )
+  })
+
+  it('should not detect named variables export with conditional type', () => {
+
+    assert(
+      `
+      import {Template, Serializable} from 'react-json-templates'
+    
+      const variable = Template(() => null)
+
+      if(cond) {
+        variable = Template(() => null)
+      }
+
+      export { variable as t1 }
+      `,
+      {
+        t1: 'Template'
+      }
+    )
+
+    assert(
+      `
+      import {Template, Serializable} from 'react-json-templates'
+    
+      let variable = Template(() => null)
+
+      if(cond) {
+        variable = Serializable(() => null)
+      }
+  
+      export { variable as n1 }
+      `,
+      {
+      }
+    )
+
+    assert(
+      `
+      import {Template, Serializable} from 'react-json-templates'
+    
+      export const n1 = cond
+        ? Template(() => null)
+        : () => null
+      `,
+      {
+      }
+    )
+
+    assert(
+      `
+      import {Template, Serializable} from 'react-json-templates'
+    
+      let variable = Template(() => null)
+      
+      variable = cond
+        ? Template(() => null)
+        : () => null
+  
+      export { variable as n1 }
+      `,
+      {
+      }
+    )
+
+    // assert(
+    //   `
+    //   import {Template, Serializable} from 'react-json-templates'
+    
+    //   export const let variable = Template(() => null)
+      
+    //   variable = cond
+    //     ? Template(() => null)
+    //     : () => null
+    //   `,
+    //   {
+    //   }
+    // )
+  })
+
+  // it('should detect multiple export types', () => {
+  //   assert(
+  //     `
+  //     import {Template, Serializable} from 'react-json-templates'
+
+  //     export const s1 = Serializable(() => null)
+
+  //     export const t1 = Template(()=> null)
+
+  //     const n1 = 5
+
+  //     export const s2 = s1
+
+  //     export let n2 = Template(()=> null)
+
+  //     n2 = () => null
+
+  //     export default Template(()=> null)
+  //     `,
+  //     {
+  //       s1: 'Serializable',
+  //       s2: 'Serializable',
+  //       t1: 'Template',
+  //       default: 'Template'
+  //     }
+  //   )
   // })
 })
