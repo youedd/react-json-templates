@@ -1,19 +1,15 @@
-import { AnalyserResult, analyser } from './analyser'
+import { type AnalyserResult, analyser } from './analyser'
 
-
-
-const assert = (code: string, expected: AnalyserResult['exports']) => {
+const assert = (code: string, expected: AnalyserResult['exports']): void => {
   const result = analyser(code)
 
   expect(result.exports).toEqual(expected)
 }
 
-
-describe("analyser", () => {
-
+describe('analyser', () => {
   it('should not detect default unknown exports', () => {
     assert(
-      `export default 5;`,
+      'export default 5;',
       {
       }
     )
@@ -113,7 +109,6 @@ describe("analyser", () => {
   })
 
   it('should not detect default variables export with conditional type', () => {
-
     assert(
       `
       import {Template, Serializable} from 'react-json-templates'
@@ -355,7 +350,6 @@ describe("analyser", () => {
   })
 
   it('should not detect named variables export with conditional type', () => {
-
     assert(
       `
       import {Template, Serializable} from 'react-json-templates'
