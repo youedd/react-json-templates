@@ -417,46 +417,46 @@ describe("analyser", () => {
       }
     )
 
-    // assert(
-    //   `
-    //   import {Template, Serializable} from 'react-json-templates'
+    assert(
+      `
+      import {Template, Serializable} from 'react-json-templates'
     
-    //   export const let variable = Template(() => null)
+      export let variable = Template(() => null)
       
-    //   variable = cond
-    //     ? Template(() => null)
-    //     : () => null
-    //   `,
-    //   {
-    //   }
-    // )
+      variable = cond
+        ? Template(() => null)
+        : () => null
+      `,
+      {
+      }
+    )
   })
 
-  // it('should detect multiple export types', () => {
-  //   assert(
-  //     `
-  //     import {Template, Serializable} from 'react-json-templates'
+  it('should detect multiple export types', () => {
+    assert(
+      `
+      import {Template, Serializable} from 'react-json-templates'
 
-  //     export const s1 = Serializable(() => null)
+      export const s1 = Serializable(() => null)
 
-  //     export const t1 = Template(()=> null)
+      export const t1 = Template(()=> null)
 
-  //     const n1 = 5
+      const n1 = 5
 
-  //     export const s2 = s1
+      export const s2 = s1
 
-  //     export let n2 = Template(()=> null)
+      export let n2 = Template(()=> null)
 
-  //     n2 = () => null
+      n2 = () => null
 
-  //     export default Template(()=> null)
-  //     `,
-  //     {
-  //       s1: 'Serializable',
-  //       s2: 'Serializable',
-  //       t1: 'Template',
-  //       default: 'Template'
-  //     }
-  //   )
-  // })
+      export default Template(()=> null)
+      `,
+      {
+        s1: 'Serializable',
+        s2: 'Serializable',
+        t1: 'Template',
+        default: 'Template'
+      }
+    )
+  })
 })

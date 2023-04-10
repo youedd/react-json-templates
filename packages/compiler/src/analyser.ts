@@ -11,12 +11,18 @@ export const analyser = (code: string): AnalyserResult => {
 
   const result: AnalyserResult = { exports: {} }
 
-  const setExportType = (key: string, value: ExportType | null) => {
-    if (!value) {
+  const setExportType = (key: string, value: Array<ExportType | null> | ExportType | null) => {
+    const val = Array.isArray(value)
+      ? value.length === 1 && value[0] !== null
+        ? value[0]
+        : null
+      : value
+
+    if (!val) {
       return
     }
 
-    result.exports[key] = value
+    result.exports[key] = val
   }
 
   const ast = parse(
@@ -35,7 +41,6 @@ export const analyser = (code: string): AnalyserResult => {
         if (declaration.isVariableDeclaration()) {
           declaration.get("declarations").forEach(declarator => {
             const lVal = declarator.get("id")
-            const rVal = declarator.get("init")
 
             if (!lVal.isIdentifier()) {
               return
@@ -43,8 +48,8 @@ export const analyser = (code: string): AnalyserResult => {
 
             const name = lVal.node.name
 
-            const exportType = getExportTypeFromNode(rVal)
-            setExportType(name, exportType)
+            const exportTypes = getIdentifierPossibleTypes(lVal)
+            setExportType(name, exportTypes)
           })
         }
 
