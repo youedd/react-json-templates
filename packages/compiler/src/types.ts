@@ -1,4 +1,4 @@
-import type { ParserPlugin } from "@babel/parser"
+import type { ParserPlugin } from '@babel/parser'
 
 export type RJTComponentType =
   | { type: 'Template' }
@@ -9,11 +9,9 @@ export interface RJTAnalyserResult {
   exports: Record<string, RJTComponentType>
 }
 
-export type RJTCompilerCache = {
-  [hash: string]: RJTAnalyserResult
-}
+export type RJTAnalyserCache = Record<string, RJTAnalyserResult>
 
-export type RJTCompilerConfig = {
-  sourceType: "module",
+export interface RJTCompilerConfig {
+  sourceType: 'module'
   plugins: ParserPlugin[]
 }

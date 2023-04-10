@@ -1,18 +1,26 @@
 import { analyser } from './analyser'
-import type { RJTAnalyserResult, RJTCompilerConfig } from './types'
+import type { RJTAnalyserCache, RJTAnalyserResult, RJTCompilerConfig } from './types'
+import fs from 'fs'
+import { getHash } from './utils'
+
+const config: RJTCompilerConfig = {
+  sourceType: 'module',
+  plugins: ['jsx', 'typescript']
+}
 
 const assert = (code: string, expected: RJTAnalyserResult['exports']): void => {
-  const config: RJTCompilerConfig = {
-    sourceType: "module",
-    plugins: ["jsx", "typescript"]
-  }
+  jest.spyOn(fs, 'readFileSync').mockReturnValue(code)
 
-  const result = analyser(code, config)
+  const result = analyser('filPath', config)
 
   expect(result.exports).toEqual(expected)
 }
 
 describe('analyser', () => {
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+
   it('should not detect default unknown exports', () => {
     assert(
       'export default 5;',
@@ -29,7 +37,7 @@ describe('analyser', () => {
       export default Serializable("s1",() => null);
       `,
       {
-        default: { type: 'Serializable', name: "s1" }
+        default: { type: 'Serializable', name: 's1' }
       }
     )
 
@@ -40,7 +48,7 @@ describe('analyser', () => {
       export default _Serializable("s1", () => null);
       `,
       {
-        default: { type: 'Serializable', name: "s1" }
+        default: { type: 'Serializable', name: 's1' }
       }
     )
   })
@@ -94,7 +102,7 @@ describe('analyser', () => {
       export default variable
       `,
       {
-        default: { type: 'Serializable', name: "s1" }
+        default: { type: 'Serializable', name: 's1' }
       }
     )
 
@@ -109,7 +117,7 @@ describe('analyser', () => {
       export default variable
       `,
       {
-        default: { type: 'Serializable', name: "s1" }
+        default: { type: 'Serializable', name: 's1' }
       }
     )
   })
@@ -262,7 +270,7 @@ describe('analyser', () => {
       export const s1 = Serializable("s1", () => null)
       `,
       {
-        s1: { type: 'Serializable', name: "s1" }
+        s1: { type: 'Serializable', name: 's1' }
       }
     )
 
@@ -275,7 +283,7 @@ describe('analyser', () => {
       export { s1 }
       `,
       {
-        s1: { type: 'Serializable', name: "s1" }
+        s1: { type: 'Serializable', name: 's1' }
       }
     )
 
@@ -288,7 +296,7 @@ describe('analyser', () => {
       export { _s1 as s1 }
       `,
       {
-        s1: { type: 'Serializable', name: "s1" }
+        s1: { type: 'Serializable', name: 's1' }
       }
     )
   })
@@ -318,7 +326,7 @@ describe('analyser', () => {
       export const s1 = variable
       `,
       {
-        s1: { type: 'Serializable', name: "s1" }
+        s1: { type: 'Serializable', name: 's1' }
       }
     )
 
@@ -333,7 +341,7 @@ describe('analyser', () => {
       export const s1 = variable
       `,
       {
-        s1: { type: 'Serializable', name: "s1" }
+        s1: { type: 'Serializable', name: 's1' }
       }
     )
 
@@ -350,7 +358,7 @@ describe('analyser', () => {
       export { s1 }
       `,
       {
-        s1: { type: 'Serializable', name: "s1" }
+        s1: { type: 'Serializable', name: 's1' }
       }
     )
   })
@@ -452,11 +460,50 @@ describe('analyser', () => {
       export default Template(()=> null)
       `,
       {
-        s1: { type: 'Serializable', name: "s1" },
-        s2: { type: 'Serializable', name: "s1" },
+        s1: { type: 'Serializable', name: 's1' },
+        s2: { type: 'Serializable', name: 's1' },
         t1: { type: 'Template' },
         default: { type: 'Template' }
       }
     )
+  })
+
+  it('should use analyser cache', () => {
+    const code = `
+    import { Template } from "react-json-template";
+
+    export const t1 = Template(()=> null)
+    `
+    const hash = getHash(code)
+
+    jest.spyOn(fs, 'readFileSync').mockReturnValue(code)
+
+    const cache: RJTAnalyserCache = {
+      [hash]: { exports: { t1: { type: 'Template' } } }
+    }
+
+    const result = analyser('filePath', config, cache)
+
+    expect(result).toBe(cache[hash])
+  })
+
+  it('should populate analyser cache', () => {
+    const code = `
+    import { Template } from "react-json-template";
+
+    export const t1 = Template(()=> null)
+    `
+    const hash = getHash(code)
+
+    jest.spyOn(fs, 'readFileSync').mockReturnValue(code)
+
+    const cache: RJTAnalyserCache = {}
+
+    expect(cache[hash]).toBeUndefined()
+
+    const result = analyser('filePath', config, cache)
+
+    expect(cache[hash]).toEqual({ exports: { t1: { type: 'Template' } } })
+    expect(result).toBe(cache[hash])
   })
 })

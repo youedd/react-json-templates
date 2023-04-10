@@ -1,6 +1,6 @@
-import { NodePath } from "@babel/traverse"
-import * as types from "@babel/types"
-import { RJTComponentType, RJTType } from "./types"
+import { type NodePath } from '@babel/traverse'
+import type * as types from '@babel/types'
+import { type RJTComponentType, type RJTType } from './types'
 
 export const getIdentifierPossibleTypes = (
   path: NodePath<types.Identifier | types.JSXIdentifier>
@@ -82,16 +82,14 @@ const getRJTTypeFromCallExpression = (path: NodePath<types.CallExpression>): RJT
 
   const type = getRJTTypeFromImportSpecifier(binding?.path)
 
-
-  if (type === "Template") {
+  if (type === 'Template') {
     return { type }
   }
 
-  if (type === "Serializable") {
-
+  if (type === 'Serializable') {
     const name = path.get('arguments')[0]
 
-    if (name != null && name.isStringLiteral()) {
+    if (name?.isStringLiteral()) {
       return {
         type,
         name: name.node.value

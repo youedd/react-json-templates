@@ -1,20 +1,39 @@
 import traverse, { type NodePath } from '@babel/traverse'
-import { parse } from '@babel/parser'
-import * as types from '@babel/types'
-import { RJTAnalyserResult, RJTCompilerConfig, RJTComponentType } from './types'
+import type * as types from '@babel/types'
+import { type RJTAnalyserCache, type RJTAnalyserResult, type RJTCompilerConfig, type RJTComponentType } from './types'
 import { getIdentifierPossibleTypes, getRJTTypeFromPath } from './typeUtils'
+import { getHash, parseString, readFile } from './utils'
 
+/**
+ *
+ * Analyze a file source code and extract exported Serializables and Templates and
+ * updates the Analyser's chache
+ *
+ * @param filePath
+ * @param config Compiler config
+ * @param cache Analyser's cache
+ * @returns  Analyser's result
+ */
 export const analyser = (
-  code: string,
+  filePath: string,
   config: RJTCompilerConfig,
+  cache: RJTAnalyserCache = {}
 ): RJTAnalyserResult => {
+  const code = readFile(filePath)
+  const hash = getHash(code)
+
+  if (cache[hash] != null) {
+    return cache[hash]
+  }
+
+  const ast = parseString(code, config)
+
   const result: RJTAnalyserResult = { exports: {} }
 
   const setExportType = (
     key: string,
     value: Array<RJTComponentType | null> | RJTComponentType | null
   ): void => {
-
     const val = Array.isArray(value)
       ? value.length === 1 && value[0] !== null
         ? value[0]
@@ -28,12 +47,10 @@ export const analyser = (
     result.exports[key] = val
   }
 
-  const ast = parse(code, config)
-
   traverse(
     ast,
     {
-      ExportNamedDeclaration(path) {
+      ExportNamedDeclaration (path) {
         const declaration = path.get('declaration')
 
         if (declaration.isVariableDeclaration()) {
@@ -67,7 +84,7 @@ export const analyser = (
           setExportType(name, exportType)
         })
       },
-      ExportDefaultDeclaration(path) {
+      ExportDefaultDeclaration (path) {
         const declaration = path.get('declaration')
 
         const exportType = getRJTTypeFromPath(declaration)
@@ -75,5 +92,8 @@ export const analyser = (
       }
     }
   )
+
+  cache[hash] = result
+
   return result
 }

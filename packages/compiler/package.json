@@ -4,10 +4,13 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@babel/code-frame": "^7.21.4",
     "@babel/parser": "^7.21.4",
-    "@babel/traverse": "^7.21.4"
+    "@babel/traverse": "^7.21.4",
+    "crypto": "^1.0.1"
   },
   "devDependencies": {
+    "@types/babel__code-frame": "^7.0.3",
     "@types/debug": "^4.1.7",
     "debug": "^4.3.4"
   }
