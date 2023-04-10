@@ -1,6 +1,7 @@
-import { type AnalyserResult, analyser } from './analyser'
+import { analyser } from './analyser'
+import type { RJTAnalyserResult } from './types'
 
-const assert = (code: string, expected: AnalyserResult['exports']): void => {
+const assert = (code: string, expected: RJTAnalyserResult['exports']): void => {
   const result = analyser(code)
 
   expect(result.exports).toEqual(expected)
