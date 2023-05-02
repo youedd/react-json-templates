@@ -6,8 +6,8 @@ import { getHash, parseString, readFile } from './utils'
 
 /**
  *
- * Analyze a file source code and extract exported Serializables and Templates and
- * updates the Analyser's chache
+ * Analyze a file source code, extract exported Serializables and
+ * updates the Analyser's cache
  *
  * @param filePath
  * @param config Compiler config

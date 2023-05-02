@@ -39,10 +39,6 @@ export const getIdentifierPossibleTypes = (
   return possibleTypes
     .filter((item, index, self) => {
       const isFirstOccurrence = index === self.findIndex(i => {
-        if (item?.type === 'Template') {
-          return i?.type === 'Template'
-        }
-
         if (item?.type === 'Serializable') {
           return i?.type === 'Serializable' && i?.name === item.name
         }
@@ -82,10 +78,6 @@ const getRJTTypeFromCallExpression = (path: NodePath<types.CallExpression>): RJT
 
   const type = getRJTTypeFromImportSpecifier(binding?.path)
 
-  if (type === 'Template') {
-    return { type }
-  }
-
   if (type === 'Serializable') {
     const name = path.get('arguments')[0]
 
@@ -115,7 +107,7 @@ const getRJTTypeFromImportSpecifier = (path: NodePath<types.ImportSpecifier>): R
     return null
   }
 
-  return ['Template', 'Serializable'].includes(imported.node.name)
+  return ['Serializable'].includes(imported.node.name)
     ? imported.node.name as RJTType
     : null
 }

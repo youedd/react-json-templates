@@ -1,8 +1,9 @@
 import type { ParserPlugin } from '@babel/parser'
 
-export type RJTComponentType =
-  | { type: 'Template' }
-  | { type: 'Serializable', name: string }
+export type RJTComponentType = {
+  type: 'Serializable',
+  name: string
+}
 
 export type RJTType = RJTComponentType['type']
 export interface RJTAnalyserResult {

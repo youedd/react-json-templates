@@ -12,6 +12,7 @@
   "devDependencies": {
     "@types/babel__code-frame": "^7.0.3",
     "@types/debug": "^4.1.7",
-    "debug": "^4.3.4"
+    "debug": "^4.3.4",
+    "ts-jest": "^29.1.0"
   }
 }
