@@ -1,8 +1,8 @@
-import fs from 'fs'
 import * as Analyser from '../analyser'
 import * as ExportAnalyser from "../analyser/analyzeExports"
 import * as TemplateAnalyser from "../analyser/analyzeTemplate"
 import * as Utils from "../utils"
+import type { File } from "@babel/types"
 import type { RJTAnalyserCache, RJTAnalyserResult, RJTCompilerConfig } from '../types'
 
 const config: RJTCompilerConfig = {
@@ -17,7 +17,6 @@ describe('analyzer', () => {
 
   describe(Analyser.analyze, () => {
     it("should call analyzeExports for non templates files", () => {
-      jest.spyOn(fs, 'readFileSync').mockReturnValue("")
       jest.spyOn(Utils, "getHash").mockReturnValue("hash")
 
       const result: RJTAnalyserResult = {
@@ -30,13 +29,12 @@ describe('analyzer', () => {
 
       const spy = jest.spyOn(ExportAnalyser, 'analyzeExports').mockReturnValue(result)
 
-      expect(Analyser.analyze("filePath", config, cache)).toEqual(result)
+      expect(Analyser.analyze({ filePath: "filePath", code: "", ast: null as unknown as File, cache })).toEqual(result)
       expect(spy).toBeCalled()
       expect(cache.hash).toBe(result)
     })
 
     it("should call analyzeTemplate for tsx templates files", () => {
-      jest.spyOn(fs, 'readFileSync').mockReturnValue("")
       jest.spyOn(Utils, "getHash").mockReturnValue("hash")
 
       const result: RJTAnalyserResult = {
@@ -47,13 +45,12 @@ describe('analyzer', () => {
 
       const spy = jest.spyOn(TemplateAnalyser, 'analyzeTemplate').mockReturnValue(result)
 
-      expect(Analyser.analyze("filePath.rjt.tsx", config, cache)).toEqual(result)
+      expect(Analyser.analyze({ filePath: "filePath.rjt.tsx", code: "", ast: null as unknown as File, cache })).toEqual(result)
       expect(spy).toBeCalled()
       expect(cache.hash).toBe(result)
     })
 
     it("should call analyzeTemplate for jsx templates files", () => {
-      jest.spyOn(fs, 'readFileSync').mockReturnValue("")
       jest.spyOn(Utils, "getHash").mockReturnValue("hash")
 
       const result: RJTAnalyserResult = {
@@ -65,13 +62,12 @@ describe('analyzer', () => {
 
       const spy = jest.spyOn(TemplateAnalyser, 'analyzeTemplate').mockReturnValue(result)
 
-      expect(Analyser.analyze("filePath.rjt.jsx", config, cache)).toEqual(result)
+      expect(Analyser.analyze({ filePath: "filePath.rjt.jsx", code: "", ast: null as unknown as File, cache })).toEqual(result)
       expect(spy).toBeCalled()
       expect(cache.hash).toBe(result)
     })
 
     it('should use cache for non templates files', () => {
-      jest.spyOn(fs, 'readFileSync').mockReturnValue("")
       jest.spyOn(Utils, "getHash").mockReturnValue("hash")
 
       const result: RJTAnalyserResult = {
@@ -85,12 +81,11 @@ describe('analyzer', () => {
 
       const spy = jest.spyOn(ExportAnalyser, 'analyzeExports')
 
-      expect(Analyser.analyze("filePath", config, cache)).toEqual(result)
+      expect(Analyser.analyze({ filePath: "filePath", code: "", ast: null as unknown as File, cache })).toEqual(result)
       expect(spy).not.toBeCalled()
     })
 
     it('should use cache for tsx templates files', () => {
-      jest.spyOn(fs, 'readFileSync').mockReturnValue("")
       jest.spyOn(Utils, "getHash").mockReturnValue("hash")
 
       const result: RJTAnalyserResult = {
@@ -102,12 +97,11 @@ describe('analyzer', () => {
 
       const spy = jest.spyOn(TemplateAnalyser, 'analyzeTemplate')
 
-      expect(Analyser.analyze("filePath.rjt.tsx", config, cache)).toEqual(result)
+      expect(Analyser.analyze({ filePath: "filePath.rjt.tsx", code: "", ast: null as unknown as File, cache })).toEqual(result)
       expect(spy).not.toBeCalled()
     })
 
     it('should use cache for jsx templates files', () => {
-      jest.spyOn(fs, 'readFileSync').mockReturnValue("")
       jest.spyOn(Utils, "getHash").mockReturnValue("hash")
 
       const result: RJTAnalyserResult = {
@@ -119,14 +113,21 @@ describe('analyzer', () => {
 
       const spy = jest.spyOn(TemplateAnalyser, 'analyzeTemplate')
 
-      expect(Analyser.analyze("filePath.rjt.jsx", config, cache)).toEqual(result)
+      expect(Analyser.analyze({ filePath: "filePath.rjt.jsx", code: "", ast: null as unknown as File, cache })).toEqual(result)
       expect(spy).not.toBeCalled()
     })
   })
 
   describe(Analyser.analyzeExports, () => {
     const assert = (code: string, expected: RJTAnalyserResult): void => {
-      const result = Analyser.analyzeExports('filPath', code, config)
+      const ast = Utils.parseString(code, config)
+
+      const result = Analyser.analyzeExports({
+        filePath: "filePath",
+        code,
+        ast,
+        cache: {}
+      })
 
       expect(result).toEqual(expected)
     }
@@ -578,20 +579,22 @@ describe('analyzer', () => {
 
   describe(Analyser.analyzeTemplate, () => {
     it("should detect valid templates", () => {
+      const code = `
+      import {S1, S2} from "../serializable"
 
-      const result = Analyser.analyzeTemplate(
-        'filPath',
-        `
-        import {S1, S2} from "../serializable"
+      const a = Math.random();
 
-        const a = Math.random();
-
-        <S1 value={a}>
-          <S2 />
-        </S1>
-        `,
-        config
-      )
+      <S1 value={a}>
+        <S2 />
+      </S1>
+      `
+      const ast = Utils.parseString(code, config)
+      const result = Analyser.analyzeTemplate({
+        code,
+        ast,
+        filePath: "filePath",
+        cache: {}
+      })
       expect(result).toEqual({ type: 'Template', exports: null })
     })
 
@@ -647,13 +650,16 @@ describe('analyzer', () => {
         `
       ]
 
+
       invalidCodes.forEach((code) => {
+        const ast = Utils.parseString(code, config)
         expect(() => {
-          Analyser.analyzeTemplate(
-            'filPath',
+          Analyser.analyzeTemplate({
+            filePath: 'filPath',
             code,
-            config
-          )
+            ast,
+            cache: {}
+          })
         })
           .toThrow("invalid syntax")
       })

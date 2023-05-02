@@ -1,7 +1,6 @@
 import traverse from '@babel/traverse'
 import * as types from '@babel/types'
-import type { RJTAnalyserResult, RJTCompilerConfig } from '../types'
-import { parseString } from '../utils'
+import type { RJTAnalyserConfig, RJTAnalyserResult } from '../types'
 import { InvalidSyntaxError } from '../errors'
 
 /**
@@ -12,12 +11,8 @@ import { InvalidSyntaxError } from '../errors'
  * @param config Compiler config
  * @returns  Analyser's result
  */
-export const analyzeTemplate = (
-  filePath: string,
-  code: string,
-  config: RJTCompilerConfig,
-): RJTAnalyserResult => {
-  const ast = parseString(code, config)
+export const analyzeTemplate = (config: RJTAnalyserConfig): RJTAnalyserResult => {
+  const { ast, filePath, code } = config
 
   const lastExpression = ast.program.body.at(-1)
 
@@ -59,5 +54,5 @@ export const analyzeTemplate = (
     }
   )
 
-  return  { type: "Template", exports: null }
+  return { type: "Template", exports: null }
 }

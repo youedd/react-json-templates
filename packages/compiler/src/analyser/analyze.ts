@@ -1,5 +1,5 @@
-import { RJTAnalyserCache, RJTAnalyserResult, RJTCompilerConfig } from "../types";
-import { getHash, readFile } from "../utils";
+import { RJTAnalyserConfig, RJTAnalyserResult } from "../types";
+import { getHash } from "../utils";
 import { analyzeExports } from "./analyzeExports";
 import { analyzeTemplate } from "./analyzeTemplate";
 
@@ -14,12 +14,9 @@ import { analyzeTemplate } from "./analyzeTemplate";
  * @param cache Analyser's cache
  * @returns  Analyser's result
  */
-export const analyze = (
-  filePath: string,
-  config: RJTCompilerConfig,
-  cache: RJTAnalyserCache
-): RJTAnalyserResult => {
-  const code = readFile(filePath)
+export const analyze = (config: RJTAnalyserConfig): RJTAnalyserResult => {
+  const { filePath, code, cache } = config
+
   const hash = getHash(code)
 
   if (cache[hash]) {
@@ -30,9 +27,9 @@ export const analyze = (
     filePath.endsWith("rjt.tsx") ||
     filePath.endsWith("rjt.jsx")
   ) {
-    cache[hash] = analyzeTemplate(filePath, code, config)
+    cache[hash] = analyzeTemplate(config)
   } else {
-    cache[hash] = analyzeExports(filePath, code, config)
+    cache[hash] = analyzeExports(config)
   }
 
   return cache[hash]

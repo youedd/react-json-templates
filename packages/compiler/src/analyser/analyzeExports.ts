@@ -1,8 +1,7 @@
 import traverse, { type NodePath } from '@babel/traverse'
 import type * as types from '@babel/types'
-import { type RJTAnalyserResult, type RJTCompilerConfig, type RJTComponentType } from '../types'
+import type { RJTAnalyserConfig, RJTAnalyserResult, RJTComponentType } from '../types'
 import { getIdentifierPossibleTypes, getRJTTypeFromPath } from '../typeUtils'
-import { parseString, readFile } from '../utils'
 
 /**
  *
@@ -13,12 +12,8 @@ import { parseString, readFile } from '../utils'
  * @param config Compiler config
  * @returns  Analyser's result
  */
-export const analyzeExports = (
-  _filePath: string,
-  code: string,
-  config: RJTCompilerConfig
-): RJTAnalyserResult => {
-  const ast = parseString(code, config)
+export const analyzeExports = (config: RJTAnalyserConfig): RJTAnalyserResult => {
+  const { ast } = config
 
   const result: RJTAnalyserResult = { type: "Exports", exports: {} }
 
