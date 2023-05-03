@@ -1,6 +1,6 @@
 import * as Analyser from '../analyser'
-import * as Utils from "../utils"
-import type { File } from "@babel/types"
+import * as Utils from '../utils'
+import type { File } from '@babel/types'
 import type { RJTCompilerCache, RJTAnalyserResult, RJTCompilerConfig } from '../types'
 
 const config: RJTCompilerConfig = {
@@ -14,31 +14,31 @@ describe('analyzer', () => {
   })
 
   describe(Analyser.analyze, () => {
-    it("should call analyzeExports when result not found in cache", () => {
-      jest.spyOn(Utils, "getHash").mockReturnValue("hash")
+    it('should call analyzeExports when result not found in cache', () => {
+      jest.spyOn(Utils, 'getHash').mockReturnValue('hash')
 
       const result: RJTAnalyserResult = {
-        type: "Exports",
+        type: 'Exports',
         exports: {
-          default: { name: "s11", type: "Serializable" }
+          default: { name: 's11', type: 'Serializable' }
         }
       }
       const cache: RJTCompilerCache = {}
 
       const spy = jest.spyOn(Analyser, 'analyzeExports').mockReturnValue(result)
 
-      expect(Analyser.analyze({ filePath: "filePath", code: "", ast: null as unknown as File, cache })).toEqual(result)
+      expect(Analyser.analyze({ filePath: 'filePath', code: '', ast: null as unknown as File, cache })).toEqual(result)
       expect(spy).toBeCalled()
       expect(cache.hash).toBe(result)
     })
 
     it('should use cache for ', () => {
-      jest.spyOn(Utils, "getHash").mockReturnValue("hash")
+      jest.spyOn(Utils, 'getHash').mockReturnValue('hash')
 
       const result: RJTAnalyserResult = {
-        type: "Exports",
+        type: 'Exports',
         exports: {
-          default: { name: "s11", type: "Serializable" }
+          default: { name: 's11', type: 'Serializable' }
         }
       }
 
@@ -46,7 +46,7 @@ describe('analyzer', () => {
 
       const spy = jest.spyOn(Analyser, 'analyzeExports')
 
-      expect(Analyser.analyze({ filePath: "filePath", code: "", ast: null as unknown as File, cache })).toEqual(result)
+      expect(Analyser.analyze({ filePath: 'filePath', code: '', ast: null as unknown as File, cache })).toEqual(result)
       expect(spy).not.toBeCalled()
     })
 
@@ -82,8 +82,6 @@ describe('analyzer', () => {
     //   expect(spy).toBeCalled()
     //   expect(cache.hash).toBe(result)
     // })
-
-
 
     // it('should use cache for tsx templates files', () => {
     //   jest.spyOn(Utils, "getHash").mockReturnValue("hash")
@@ -123,7 +121,7 @@ describe('analyzer', () => {
       const ast = Utils.parseString(code, config)
 
       const result = Analyser.analyzeExports({
-        filePath: "filePath",
+        filePath: 'filePath',
         code,
         ast,
         cache: {}
@@ -136,7 +134,7 @@ describe('analyzer', () => {
       assert(
         'export default 5;',
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {}
         }
       )
@@ -150,7 +148,7 @@ describe('analyzer', () => {
         export default Serializable("s1",() => null);
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {
             default: { type: 'Serializable', name: 's1' }
           }
@@ -164,7 +162,7 @@ describe('analyzer', () => {
         export default _Serializable("s1", () => null);
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {
             default: { type: 'Serializable', name: 's1' }
           }
@@ -182,13 +180,12 @@ describe('analyzer', () => {
         export default variable
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {
             default: { type: 'Serializable', name: 's1' }
           }
         }
       )
-
 
       assert(
         `
@@ -201,7 +198,7 @@ describe('analyzer', () => {
         export default variable
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {
             default: { type: 'Serializable', name: 's1' }
           }
@@ -223,9 +220,9 @@ describe('analyzer', () => {
         export default variable
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {
-            default: { type: 'Serializable', name: "s1" }
+            default: { type: 'Serializable', name: 's1' }
           }
         }
       )
@@ -243,7 +240,7 @@ describe('analyzer', () => {
         export default variable
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {}
         }
       )
@@ -261,7 +258,7 @@ describe('analyzer', () => {
         export default variable
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {}
         }
       )
@@ -277,7 +274,7 @@ describe('analyzer', () => {
         export default variable
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {}
         }
       )
@@ -289,7 +286,7 @@ describe('analyzer', () => {
         export const n1 = () => null
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {}
         }
       )
@@ -301,7 +298,7 @@ describe('analyzer', () => {
         export { n1 }
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {}
         }
       )
@@ -313,7 +310,7 @@ describe('analyzer', () => {
         export { _n1 as n1 }
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {}
         }
       )
@@ -327,7 +324,7 @@ describe('analyzer', () => {
         export const s1 = Serializable("s1", () => null)
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {
             s1: { type: 'Serializable', name: 's1' }
           }
@@ -343,7 +340,7 @@ describe('analyzer', () => {
         export { s1 }
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {
             s1: { type: 'Serializable', name: 's1' }
           }
@@ -359,7 +356,7 @@ describe('analyzer', () => {
         export { _s1 as s1 }
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {
             s1: { type: 'Serializable', name: 's1' }
           }
@@ -377,7 +374,7 @@ describe('analyzer', () => {
         export const s1 = variable
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {
             s1: { type: 'Serializable', name: 's1' }
           }
@@ -395,7 +392,7 @@ describe('analyzer', () => {
         export const s1 = variable
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {
             s1: { type: 'Serializable', name: 's1' }
           }
@@ -413,7 +410,7 @@ describe('analyzer', () => {
         export const s1 = variable
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {
             s1: { type: 'Serializable', name: 's1' }
           }
@@ -433,7 +430,7 @@ describe('analyzer', () => {
         export { s1 }
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {
             s1: { type: 'Serializable', name: 's1' }
           }
@@ -455,9 +452,9 @@ describe('analyzer', () => {
         export { variable as s1 }
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {
-            s1: { type: 'Serializable', name: "s1" }
+            s1: { type: 'Serializable', name: 's1' }
           }
         }
       )
@@ -475,7 +472,7 @@ describe('analyzer', () => {
         export { variable as s1 }
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {}
         }
       )
@@ -493,7 +490,7 @@ describe('analyzer', () => {
         export { variable as n1 }
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {}
         }
       )
@@ -511,7 +508,7 @@ describe('analyzer', () => {
         export { variable as n1 }
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {}
         }
       )
@@ -525,7 +522,7 @@ describe('analyzer', () => {
           : () => null
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {}
         }
       )
@@ -541,7 +538,7 @@ describe('analyzer', () => {
           : () => null
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {}
         }
       )
@@ -565,7 +562,7 @@ describe('analyzer', () => {
         export default Serializable("s3", () => null)
         `,
         {
-          type: "Exports",
+          type: 'Exports',
           exports: {
             s1: { type: 'Serializable', name: 's1' },
             s2: { type: 'Serializable', name: 's1' },
@@ -574,7 +571,6 @@ describe('analyzer', () => {
         }
       )
     })
-
   })
 
   // describe(Analyser.analyzeTemplate, () => {
@@ -649,7 +645,6 @@ describe('analyzer', () => {
   //       </S1>
   //       `
   //     ]
-
 
   //     invalidCodes.forEach((code) => {
   //       const ast = Utils.parseString(code, config)

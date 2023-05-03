@@ -1,14 +1,13 @@
-import traverse, { NodePath } from "@babel/traverse";
-import { RJTAnalyserResult, RJTCompilerCache, RJTComponentType } from "./types";
-import { getHash } from "./utils";
-import { getIdentifierPossibleTypes, getRJTTypeFromPath } from "./typeUtils";
-import * as types from "@babel/types"
+import traverse, { type NodePath } from '@babel/traverse'
+import type { RJTAnalyserResult, RJTCompilerCache, RJTComponentType } from './types'
+import { getHash } from './utils'
+import { getIdentifierPossibleTypes, getRJTTypeFromPath } from './typeUtils'
+import type * as types from '@babel/types'
 
-
-type Config = {
-  code: string,
-  ast: types.File,
-  filePath: string,
+interface Config {
+  code: string
+  ast: types.File
+  filePath: string
   cache: RJTCompilerCache
 }
 
@@ -27,7 +26,7 @@ export const analyze = (config: Config): RJTAnalyserResult => {
 
   const hash = getHash(code)
 
-  if (!cache[hash]) {
+  if (cache[hash] == null) {
     cache[hash] = analyzeExports(config)
   }
 
@@ -46,7 +45,7 @@ export const analyze = (config: Config): RJTAnalyserResult => {
 export const analyzeExports = (config: Config): RJTAnalyserResult => {
   const { ast } = config
 
-  const result: RJTAnalyserResult = { type: "Exports", exports: {} }
+  const result: RJTAnalyserResult = { type: 'Exports', exports: {} }
 
   const setExportType = (
     key: string,
@@ -68,7 +67,7 @@ export const analyzeExports = (config: Config): RJTAnalyserResult => {
   traverse(
     ast,
     {
-      ExportNamedDeclaration(path) {
+      ExportNamedDeclaration (path) {
         const declaration = path.get('declaration')
 
         if (declaration.isVariableDeclaration()) {
@@ -102,7 +101,7 @@ export const analyzeExports = (config: Config): RJTAnalyserResult => {
           setExportType(name, exportType)
         })
       },
-      ExportDefaultDeclaration(path) {
+      ExportDefaultDeclaration (path) {
         const declaration = path.get('declaration')
 
         const exportType = getRJTTypeFromPath(declaration)

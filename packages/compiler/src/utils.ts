@@ -45,3 +45,7 @@ export const getHash = (str: string): string => {
   shasum.update(str)
   return shasum.digest('hex')
 }
+
+export const isTemplatePath = (path: string): boolean => {
+  return path.endsWith('.rjt')
+}

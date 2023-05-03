@@ -1,0 +1,149 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`compiler should compile simple template 1`] = `
+"// @ts-nocheck 
+
+ type X = number;
+export default async function (props) {
+  const x: X = 5;
+  return {
+    type: "__RJT_COMPONENT__",
+    name: "S1",
+    props: {
+      children: [{
+        type: "__RJT_COMPONENT__",
+        name: "S2",
+        props: {
+          x: x,
+          children: []
+        }
+      }]
+    }
+  };
+}"
+`;
+
+exports[`compiler should compile template with fragment 1`] = `
+"// @ts-nocheck 
+
+ type X = number;
+interface Y {
+  foo: string;
+}
+export default async function (props) {
+  const x: X = 5;
+  const y = {
+    foo: "bar"
+  };
+  return {
+    type: "__RJT_FRAGMENT__",
+    children: [{
+      type: "__RJT_COMPONENT__",
+      name: "S1",
+      props: {
+        x: x,
+        children: []
+      }
+    }, {
+      type: "__RJT_COMPONENT__",
+      name: "S2",
+      props: {
+        y: y,
+        children: []
+      }
+    }]
+  };
+}"
+`;
+
+exports[`compiler should compile template with js code  1`] = `
+"// @ts-nocheck 
+
+ import T1 from "./T.rjt";
+export default async function (props) {
+  return T1({
+    children: [{
+      type: "__RJT_COMPONENT__",
+      name: "S1",
+      props: {
+        x: 0,
+        children: []
+      }
+    }, [1, 2, 3].map(item => ({
+      type: "__RJT_COMPONENT__",
+      name: "S1",
+      props: {
+        x: item,
+        children: []
+      }
+    }))]
+  });
+}"
+`;
+
+exports[`compiler should compile template with nested templates 1`] = `
+"// @ts-nocheck 
+
+ import T1 from "./T.rjt";
+type X = number;
+interface Y {
+  foo: string;
+}
+export default async function (props) {
+  const x: X = 5;
+  const y = {
+    foo: "bar"
+  };
+  return T1({
+    x: x,
+    y: y,
+    s: {
+      type: "__RJT_COMPONENT__",
+      name: "S1",
+      props: {
+        x: x,
+        children: []
+      }
+    },
+    children: []
+  });
+}"
+`;
+
+exports[`compiler should compile template with string literals  1`] = `
+"// @ts-nocheck 
+
+ import T1 from "./T.rjt";
+export default async function (props) {
+  return T1({
+    children: ["Test", {
+      type: "__RJT_COMPONENT__",
+      name: "S1",
+      props: {
+        children: []
+      }
+    }]
+  });
+}"
+`;
+
+exports[`compiler should compile template with unordered imports and types 1`] = `
+"// @ts-nocheck 
+
+ import T1 from "./T.rjt";
+type X = number;
+interface Y {
+  foo: string;
+}
+export default async function () {
+  const x: X = 5;
+  const y = {
+    foo: "bar"
+  };
+  return T1({
+    x: x,
+    y: y,
+    children: []
+  });
+}"
+`;

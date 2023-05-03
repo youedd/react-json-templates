@@ -3,16 +3,19 @@
   "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "test": "jest"
+  },
   "dependencies": {
     "@babel/code-frame": "^7.21.4",
+    "@babel/generator": "^7.21.4",
     "@babel/parser": "^7.21.4",
     "@babel/traverse": "^7.21.4",
-    "crypto": "^1.0.1"
+    "babel-plugin-remove-unused-vars": "^2.2.0"
   },
   "devDependencies": {
     "@types/babel__code-frame": "^7.0.3",
     "@types/debug": "^4.1.7",
-    "debug": "^4.3.4",
-    "ts-jest": "^29.1.0"
+    "debug": "^4.3.4"
   }
 }

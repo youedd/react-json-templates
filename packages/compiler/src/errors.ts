@@ -53,3 +53,6 @@ export class ParseError extends Error {
     super(`${message}\n${file}${startLine}${startColumn}\n${content}`)
   }
 }
+
+export class InternalError extends Error {
+}
