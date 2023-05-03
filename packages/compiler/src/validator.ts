@@ -1,17 +1,14 @@
-import traverse from '@babel/traverse'
-import * as types from '@babel/types'
-import type { RJTAnalyserConfig, RJTAnalyserResult } from '../types'
-import { InvalidSyntaxError } from '../errors'
+import traverse from "@babel/traverse"
+import * as types from "@babel/types"
+import { InvalidSyntaxError } from "./errors"
 
-/**
- *
- * Analyze a template file source code and check if it's valid.
- *
- * @param filePath
- * @param config Compiler config
- * @returns  Analyser's result
- */
-export const analyzeTemplate = (config: RJTAnalyserConfig): RJTAnalyserResult => {
+type Config = {
+  code: string,
+  filePath: string,
+  ast: types.File
+}
+
+export const isValidTemplate = (config: Config): boolean => {
   const { ast, filePath, code } = config
 
   const lastExpression = ast.program.body.at(-1)
@@ -53,6 +50,6 @@ export const analyzeTemplate = (config: RJTAnalyserConfig): RJTAnalyserResult =>
       }
     }
   )
-
-  return { type: "Template", exports: null }
+  
+  return true
 }

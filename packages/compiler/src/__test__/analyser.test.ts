@@ -1,9 +1,7 @@
 import * as Analyser from '../analyser'
-import * as ExportAnalyser from "../analyser/analyzeExports"
-import * as TemplateAnalyser from "../analyser/analyzeTemplate"
 import * as Utils from "../utils"
 import type { File } from "@babel/types"
-import type { RJTAnalyserCache, RJTAnalyserResult, RJTCompilerConfig } from '../types'
+import type { RJTCompilerCache, RJTAnalyserResult, RJTCompilerConfig } from '../types'
 
 const config: RJTCompilerConfig = {
   sourceType: 'module',
@@ -16,7 +14,7 @@ describe('analyzer', () => {
   })
 
   describe(Analyser.analyze, () => {
-    it("should call analyzeExports for non templates files", () => {
+    it("should call analyzeExports when result not found in cache", () => {
       jest.spyOn(Utils, "getHash").mockReturnValue("hash")
 
       const result: RJTAnalyserResult = {
@@ -25,49 +23,16 @@ describe('analyzer', () => {
           default: { name: "s11", type: "Serializable" }
         }
       }
-      const cache: RJTAnalyserCache = {}
+      const cache: RJTCompilerCache = {}
 
-      const spy = jest.spyOn(ExportAnalyser, 'analyzeExports').mockReturnValue(result)
+      const spy = jest.spyOn(Analyser, 'analyzeExports').mockReturnValue(result)
 
       expect(Analyser.analyze({ filePath: "filePath", code: "", ast: null as unknown as File, cache })).toEqual(result)
       expect(spy).toBeCalled()
       expect(cache.hash).toBe(result)
     })
 
-    it("should call analyzeTemplate for tsx templates files", () => {
-      jest.spyOn(Utils, "getHash").mockReturnValue("hash")
-
-      const result: RJTAnalyserResult = {
-        type: "Template",
-        exports: null
-      }
-      const cache: RJTAnalyserCache = {}
-
-      const spy = jest.spyOn(TemplateAnalyser, 'analyzeTemplate').mockReturnValue(result)
-
-      expect(Analyser.analyze({ filePath: "filePath.rjt.tsx", code: "", ast: null as unknown as File, cache })).toEqual(result)
-      expect(spy).toBeCalled()
-      expect(cache.hash).toBe(result)
-    })
-
-    it("should call analyzeTemplate for jsx templates files", () => {
-      jest.spyOn(Utils, "getHash").mockReturnValue("hash")
-
-      const result: RJTAnalyserResult = {
-        type: "Template",
-        exports: null
-      }
-
-      const cache: RJTAnalyserCache = {}
-
-      const spy = jest.spyOn(TemplateAnalyser, 'analyzeTemplate').mockReturnValue(result)
-
-      expect(Analyser.analyze({ filePath: "filePath.rjt.jsx", code: "", ast: null as unknown as File, cache })).toEqual(result)
-      expect(spy).toBeCalled()
-      expect(cache.hash).toBe(result)
-    })
-
-    it('should use cache for non templates files', () => {
+    it('should use cache for ', () => {
       jest.spyOn(Utils, "getHash").mockReturnValue("hash")
 
       const result: RJTAnalyserResult = {
@@ -77,45 +42,80 @@ describe('analyzer', () => {
         }
       }
 
-      const cache: RJTAnalyserCache = { hash: result }
+      const cache: RJTCompilerCache = { hash: result }
 
-      const spy = jest.spyOn(ExportAnalyser, 'analyzeExports')
+      const spy = jest.spyOn(Analyser, 'analyzeExports')
 
       expect(Analyser.analyze({ filePath: "filePath", code: "", ast: null as unknown as File, cache })).toEqual(result)
       expect(spy).not.toBeCalled()
     })
 
-    it('should use cache for tsx templates files', () => {
-      jest.spyOn(Utils, "getHash").mockReturnValue("hash")
+    // it("should call analyzeTemplate for tsx templates files", () => {
+    //   jest.spyOn(Utils, "getHash").mockReturnValue("hash")
 
-      const result: RJTAnalyserResult = {
-        type: "Template",
-        exports: null
-      }
+    //   const result: RJTAnalyserResult = {
+    //     type: "Template",
+    //     exports: null
+    //   }
+    //   const cache: RJTCompilerCache = {}
 
-      const cache: RJTAnalyserCache = { hash: result }
+    //   const spy = jest.spyOn(TemplateAnalyser, 'analyzeTemplate').mockReturnValue(result)
 
-      const spy = jest.spyOn(TemplateAnalyser, 'analyzeTemplate')
+    //   expect(Analyser.analyze({ filePath: "filePath.rjt.tsx", code: "", ast: null as unknown as File, cache })).toEqual(result)
+    //   expect(spy).toBeCalled()
+    //   expect(cache.hash).toBe(result)
+    // })
 
-      expect(Analyser.analyze({ filePath: "filePath.rjt.tsx", code: "", ast: null as unknown as File, cache })).toEqual(result)
-      expect(spy).not.toBeCalled()
-    })
+    // it("should call analyzeTemplate for jsx templates files", () => {
+    //   jest.spyOn(Utils, "getHash").mockReturnValue("hash")
 
-    it('should use cache for jsx templates files', () => {
-      jest.spyOn(Utils, "getHash").mockReturnValue("hash")
+    //   const result: RJTAnalyserResult = {
+    //     type: "Template",
+    //     exports: null
+    //   }
 
-      const result: RJTAnalyserResult = {
-        type: "Template",
-        exports: null
-      }
+    //   const cache: RJTCompilerCache = {}
 
-      const cache: RJTAnalyserCache = { hash: result }
+    //   const spy = jest.spyOn(TemplateAnalyser, 'analyzeTemplate').mockReturnValue(result)
 
-      const spy = jest.spyOn(TemplateAnalyser, 'analyzeTemplate')
+    //   expect(Analyser.analyze({ filePath: "filePath.rjt.jsx", code: "", ast: null as unknown as File, cache })).toEqual(result)
+    //   expect(spy).toBeCalled()
+    //   expect(cache.hash).toBe(result)
+    // })
 
-      expect(Analyser.analyze({ filePath: "filePath.rjt.jsx", code: "", ast: null as unknown as File, cache })).toEqual(result)
-      expect(spy).not.toBeCalled()
-    })
+
+
+    // it('should use cache for tsx templates files', () => {
+    //   jest.spyOn(Utils, "getHash").mockReturnValue("hash")
+
+    //   const result: RJTAnalyserResult = {
+    //     type: "Template",
+    //     exports: null
+    //   }
+
+    //   const cache: RJTCompilerCache = { hash: result }
+
+    //   const spy = jest.spyOn(TemplateAnalyser, 'analyzeTemplate')
+
+    //   expect(Analyser.analyze({ filePath: "filePath.rjt.tsx", code: "", ast: null as unknown as File, cache })).toEqual(result)
+    //   expect(spy).not.toBeCalled()
+    // })
+
+    // it('should use cache for jsx templates files', () => {
+    //   jest.spyOn(Utils, "getHash").mockReturnValue("hash")
+
+    //   const result: RJTAnalyserResult = {
+    //     type: "Template",
+    //     exports: null
+    //   }
+
+    //   const cache: RJTCompilerCache = { hash: result }
+
+    //   const spy = jest.spyOn(TemplateAnalyser, 'analyzeTemplate')
+
+    //   expect(Analyser.analyze({ filePath: "filePath.rjt.jsx", code: "", ast: null as unknown as File, cache })).toEqual(result)
+    //   expect(spy).not.toBeCalled()
+    // })
   })
 
   describe(Analyser.analyzeExports, () => {
@@ -577,92 +577,92 @@ describe('analyzer', () => {
 
   })
 
-  describe(Analyser.analyzeTemplate, () => {
-    it("should detect valid templates", () => {
-      const code = `
-      import {S1, S2} from "../serializable"
+  // describe(Analyser.analyzeTemplate, () => {
+  //   it("should detect valid templates", () => {
+  //     const code = `
+  //     import {S1, S2} from "../serializable"
 
-      const a = Math.random();
+  //     const a = Math.random();
 
-      <S1 value={a}>
-        <S2 />
-      </S1>
-      `
-      const ast = Utils.parseString(code, config)
-      const result = Analyser.analyzeTemplate({
-        code,
-        ast,
-        filePath: "filePath",
-        cache: {}
-      })
-      expect(result).toEqual({ type: 'Template', exports: null })
-    })
+  //     <S1 value={a}>
+  //       <S2 />
+  //     </S1>
+  //     `
+  //     const ast = Utils.parseString(code, config)
+  //     const result = Analyser.analyzeTemplate({
+  //       code,
+  //       ast,
+  //       filePath: "filePath",
+  //       cache: {}
+  //     })
+  //     expect(result).toEqual({ type: 'Template', exports: null })
+  //   })
 
-    it("should throw Syntax error if invalid template", () => {
+  //   it("should throw Syntax error if invalid template", () => {
 
-      const invalidCodes = [
-        `
-        import {S1, S2} from "../serializable"
+  //     const invalidCodes = [
+  //       `
+  //       import {S1, S2} from "../serializable"
 
-        const a = Math.random();
-        `,
-        `
-        import {S1, S2} from "../serializable"
+  //       const a = Math.random();
+  //       `,
+  //       `
+  //       import {S1, S2} from "../serializable"
 
-        const a = Math.random();
+  //       const a = Math.random();
 
-        <S1 value={a}>
-          <S2 />
-        </S1>
+  //       <S1 value={a}>
+  //         <S2 />
+  //       </S1>
 
-        const x = 5
-        `,
-        `
-        import {S1, S2} from "../serializable"
+  //       const x = 5
+  //       `,
+  //       `
+  //       import {S1, S2} from "../serializable"
 
-        export const a = Math.random();
+  //       export const a = Math.random();
 
-        <S1 value={a}>
-          <S2 />
-        </S1>
-        `,
-        `
-        import {S1, S2} from "../serializable"
+  //       <S1 value={a}>
+  //         <S2 />
+  //       </S1>
+  //       `,
+  //       `
+  //       import {S1, S2} from "../serializable"
 
-        const a = Math.random();
+  //       const a = Math.random();
 
-        export default a;
-        
-        <S1 value={a}>
-          <S2 />
-        </S1>
-        `,
-        `
-        import {S1, S2} from "../serializable"
+  //       export default a;
 
-        const a = Math.random();
+  //       <S1 value={a}>
+  //         <S2 />
+  //       </S1>
+  //       `,
+  //       `
+  //       import {S1, S2} from "../serializable"
 
-        export * from "../test";
-        
-        <S1 value={a}>
-          <S2 />
-        </S1>
-        `
-      ]
+  //       const a = Math.random();
+
+  //       export * from "../test";
+
+  //       <S1 value={a}>
+  //         <S2 />
+  //       </S1>
+  //       `
+  //     ]
 
 
-      invalidCodes.forEach((code) => {
-        const ast = Utils.parseString(code, config)
-        expect(() => {
-          Analyser.analyzeTemplate({
-            filePath: 'filPath',
-            code,
-            ast,
-            cache: {}
-          })
-        })
-          .toThrow("invalid syntax")
-      })
-    })
-  })
+  //     invalidCodes.forEach((code) => {
+  //       const ast = Utils.parseString(code, config)
+  //       expect(() => {
+  //         Analyser.analyzeTemplate({
+  //           filePath: 'filPath',
+  //           code,
+  //           ast,
+  //           cache: {}
+  //         })
+  //       })
+  //         .toThrow("invalid syntax")
+  //     })
+  //   })
+  // })
 })

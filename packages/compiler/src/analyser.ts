@@ -1,7 +1,38 @@
-import traverse, { type NodePath } from '@babel/traverse'
-import type * as types from '@babel/types'
-import type { RJTAnalyserConfig, RJTAnalyserResult, RJTComponentType } from '../types'
-import { getIdentifierPossibleTypes, getRJTTypeFromPath } from '../typeUtils'
+import traverse, { NodePath } from "@babel/traverse";
+import { RJTAnalyserResult, RJTCompilerCache, RJTComponentType } from "./types";
+import { getHash } from "./utils";
+import { getIdentifierPossibleTypes, getRJTTypeFromPath } from "./typeUtils";
+import * as types from "@babel/types"
+
+
+type Config = {
+  code: string,
+  ast: types.File,
+  filePath: string,
+  cache: RJTCompilerCache
+}
+
+/**
+ *
+ * Analyze a file source code and check exported Serializables.
+ * Updates the Analyser's cache
+ *
+ * @param filePath
+ * @param config Compiler config
+ * @param cache Analyser's cache
+ * @returns  Analyser's result
+ */
+export const analyze = (config: Config): RJTAnalyserResult => {
+  const { code, cache } = config
+
+  const hash = getHash(code)
+
+  if (!cache[hash]) {
+    cache[hash] = analyzeExports(config)
+  }
+
+  return cache[hash]
+}
 
 /**
  *
@@ -12,7 +43,7 @@ import { getIdentifierPossibleTypes, getRJTTypeFromPath } from '../typeUtils'
  * @param config Compiler config
  * @returns  Analyser's result
  */
-export const analyzeExports = (config: RJTAnalyserConfig): RJTAnalyserResult => {
+export const analyzeExports = (config: Config): RJTAnalyserResult => {
   const { ast } = config
 
   const result: RJTAnalyserResult = { type: "Exports", exports: {} }
