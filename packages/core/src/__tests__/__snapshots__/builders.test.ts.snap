@@ -1,0 +1,193 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`utils Constant should build a constant array 1`] = `
+{
+  "kind": "array",
+  "name": "ITEMS",
+  "type": "__RJT_CONSTANT__",
+}
+`;
+
+exports[`utils Constant should build a constant function 1`] = `
+{
+  "kind": "function",
+  "name": "HELPER",
+  "type": "__RJT_CONSTANT__",
+}
+`;
+
+exports[`utils Constant should build a constant number 1`] = `
+{
+  "kind": "number",
+  "name": "WINDOW_WIDTH",
+  "type": "__RJT_CONSTANT__",
+}
+`;
+
+exports[`utils Constant should build a constant object 1`] = `
+{
+  "kind": "object",
+  "name": "CONFIG",
+  "type": "__RJT_CONSTANT__",
+}
+`;
+
+exports[`utils Constant should build a constant string 1`] = `
+{
+  "kind": "string",
+  "name": "TRANSLATION",
+  "type": "__RJT_CONSTANT__",
+}
+`;
+
+exports[`utils Operation should build a division operation 1`] = `
+{
+  "operands": [
+    2,
+    5,
+  ],
+  "operation": "/",
+  "type": "__RJT_OPERATION__",
+}
+`;
+
+exports[`utils Operation should build a multiplication operation 1`] = `
+{
+  "operands": [
+    2,
+    5,
+  ],
+  "operation": "*",
+  "type": "__RJT_OPERATION__",
+}
+`;
+
+exports[`utils Operation should build a pow operation 1`] = `
+{
+  "operands": [
+    2,
+    5,
+  ],
+  "operation": "pow",
+  "type": "__RJT_OPERATION__",
+}
+`;
+
+exports[`utils Operation should build a sqrt operation 1`] = `
+{
+  "operands": [
+    2,
+  ],
+  "operation": "sqrt",
+  "type": "__RJT_OPERATION__",
+}
+`;
+
+exports[`utils Operation should build a subtraction operation 1`] = `
+{
+  "operands": [
+    2,
+    5,
+  ],
+  "operation": "-",
+  "type": "__RJT_OPERATION__",
+}
+`;
+
+exports[`utils Operation should build an addition operation 1`] = `
+{
+  "operands": [
+    2,
+    5,
+  ],
+  "operation": "+",
+  "type": "__RJT_OPERATION__",
+}
+`;
+
+exports[`utils Operation should build an operation with constant operand 1`] = `
+{
+  "operands": [
+    2,
+    {
+      "kind": "number",
+      "name": "MIN_WIDTH",
+      "type": "__RJT_CONSTANT__",
+    },
+  ],
+  "operation": "*",
+  "type": "__RJT_OPERATION__",
+}
+`;
+
+exports[`utils Operation should build nested operations 1`] = `
+{
+  "operands": [
+    {
+      "operands": [
+        2,
+      ],
+      "operation": "sqrt",
+      "type": "__RJT_OPERATION__",
+    },
+    {
+      "kind": "number",
+      "name": "MIN_WIDTH",
+      "type": "__RJT_CONSTANT__",
+    },
+  ],
+  "operation": "*",
+  "type": "__RJT_OPERATION__",
+}
+`;
+
+exports[`utils should build a component object 1`] = `
+{
+  "name": "S1",
+  "props": {},
+  "type": "__RJT_COMPONENT__",
+}
+`;
+
+exports[`utils should build a component object 2`] = `
+{
+  "name": "S1",
+  "props": {
+    "for": "bar",
+  },
+  "type": "__RJT_COMPONENT__",
+}
+`;
+
+exports[`utils should build a fragment object 1`] = `
+{
+  "children": [],
+  "type": "__RJT_FRAGMENT__",
+}
+`;
+
+exports[`utils should build a fragment object 2`] = `
+{
+  "children": [
+    {
+      "name": "S1",
+      "props": {},
+      "type": "__RJT_COMPONENT__",
+    },
+  ],
+  "type": "__RJT_FRAGMENT__",
+}
+`;
+
+exports[`utils should build an action object 1`] = `
+{
+  "name": "GO_TO",
+  "params": [
+    "screen1",
+    {
+      "foo": "bar",
+    },
+  ],
+  "type": "__RJT_ACTION__",
+}
+`;
