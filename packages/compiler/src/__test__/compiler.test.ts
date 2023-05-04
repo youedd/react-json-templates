@@ -1,6 +1,6 @@
+import fs from 'fs'
 import { compile } from '../compiler'
 import { type RJTCompilerCache, type RJTCompilerConfig } from '../types'
-import fs from 'fs'
 
 const S = `
 import {Serializable} from "react-json-template"

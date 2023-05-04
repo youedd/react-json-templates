@@ -1,0 +1,9 @@
+{
+  "name": "@react-json-template/core",
+  "version": "0.0.1",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "test": "echo not implemented"
+  }
+}

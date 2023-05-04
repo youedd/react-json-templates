@@ -1,5 +1,5 @@
-import fs from 'fs'
-import crypto from 'crypto'
+import { readFileSync } from 'fs'
+import { createHash } from 'crypto'
 import { parse } from '@babel/parser'
 import { type File } from '@babel/types'
 import { type RJTCompilerConfig } from './types'
@@ -32,7 +32,7 @@ export const parseString = (source: string, config: RJTCompilerConfig): File => 
  * @returns source
  */
 export const readFile = (path: string): string => {
-  return fs.readFileSync(path).toString()
+  return readFileSync(path).toString()
 }
 
 /**
@@ -41,7 +41,7 @@ export const readFile = (path: string): string => {
  * @returns hash
  */
 export const getHash = (str: string): string => {
-  const shasum = crypto.createHash('sha1')
+  const shasum = createHash('sha1')
   shasum.update(str)
   return shasum.digest('hex')
 }

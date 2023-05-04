@@ -13,7 +13,7 @@ module.exports = {
 		ecmaVersion: "latest",
 		sourceType: "module",
 		project: [
-			"./packages/compiler/tsconfig.json"
+			"./packages/*/tsconfig.json"
 		]
 	},
 	plugins: [
