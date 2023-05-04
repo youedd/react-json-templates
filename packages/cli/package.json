@@ -1,0 +1,17 @@
+{
+  "name": "@react-json-templates/cli",
+  "version": "1.0.0",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "bin": {
+    "rjt": "./dist/src/index.js"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "rm -rf ./dist && tsc"
+  },
+  "dependencies": {
+    "commander": "^10.0.1",
+    "@react-json-templates/compiler": "*"
+  }
+}

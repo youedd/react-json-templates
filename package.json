@@ -6,7 +6,10 @@
   "private": true,
   "scripts": {
     "lint": "eslint packages --fix",
-    "test": "yarn workspaces run test"
+    "test": "jest",
+    "core": "yarn workspace @react-json-templates/core",
+    "cli": "yarn workspace @react-json-templates/cli",
+    "compiler": "yarn workspace @react-json-templates/compiler"
   },
   "workspaces": [
     "packages/*"
