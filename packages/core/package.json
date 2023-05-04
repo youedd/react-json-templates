@@ -1,8 +1,10 @@
 {
-  "name": "@react-json-template/core",
+  "name": "@react-json-templates/core",
   "version": "0.0.1",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "license": "MIT",
   "scripts": {
+    "build": "rm -rf ./dist && tsc"
   }
 }

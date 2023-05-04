@@ -20,5 +20,6 @@ module.exports = {
 		"react"
 	],
 	rules: {
-	}
+	},
+	ignorePatterns: ["**/dist"]
 }
