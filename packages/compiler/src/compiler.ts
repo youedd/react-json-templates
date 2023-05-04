@@ -8,6 +8,11 @@ import UnusedVarsPlugin from 'babel-plugin-remove-unused-vars'
 import { getIdentifierPossibleTypes } from './typeUtils'
 import Path from 'path'
 import { analyze } from './analyser'
+import resolve from "enhanced-resolve"
+
+const resolveModule = resolve.create.sync({
+  extensions: [".tsx", ".jsx", "ts", "js"]
+});
 
 interface Config {
   filePath: string
@@ -52,35 +57,35 @@ const replaceJSX = (ast: types.File, code: string, config: Config): void => {
   traverse(
     ast,
     {
-      ExportAllDeclaration (path) {
+      ExportAllDeclaration(path) {
         throw new InvalidSyntaxError(filePath, {
           code,
           start: path.node.loc?.start,
           end: path.node.loc?.end
         })
       },
-      ExportNamedDeclaration (path) {
+      ExportNamedDeclaration(path) {
         throw new InvalidSyntaxError(filePath, {
           code,
           start: path.node.loc?.start,
           end: path.node.loc?.end
         })
       },
-      ExportDefaultDeclaration (path) {
+      ExportDefaultDeclaration(path) {
         throw new InvalidSyntaxError(filePath, {
           code,
           start: path.node.loc?.start,
           end: path.node.loc?.end
         })
       },
-      JSXAttribute (path) {
+      JSXAttribute(path) {
         const value = path.get('value')
         if (value.isJSXElement() || value.isJSXFragment()) {
           path.node.value = types.jsxExpressionContainer(value.node)
         }
       },
       JSXFragment: {
-        exit (path) {
+        exit(path) {
           path.replaceWith(
             types.objectExpression([
               types.objectProperty(
@@ -96,7 +101,7 @@ const replaceJSX = (ast: types.File, code: string, config: Config): void => {
         }
       },
       JSXElement: {
-        exit (path) {
+        exit(path) {
           const openingElement = path.get('openingElement')
           const name = openingElement.get('name')
 
@@ -250,31 +255,35 @@ const getJSXIdentifierType = (
     }
   }
 
-  if (binding.path.isImportDefaultSpecifier()) {
+
+  let filePath: string | false = false
+  let key: string | null = null
+
+  if (binding.path.parentPath?.isImportDeclaration()) {
     const parent = binding.path.parent as types.ImportDeclaration
+    const dirname = Path.dirname(config.filePath)
+    filePath = resolveModule(dirname, parent.source.value)
+    key = "default"
 
-    const filePath = Path.join(config.filePath, parent.source.value)
-
-    if (isTemplatePath(filePath)) {
+    if (filePath && isTemplatePath(filePath)) {
       return 'Template'
     }
-    const code = readFile(filePath)
-    const ast = parseString(code, config.compilerConfig)
-
-    const analyzerResult = analyze({
-      cache: config.cache,
-      ast,
-      code,
-      filePath
-    })
-
-    return analyzerResult.exports?.default ?? null
   }
 
   if (binding.path.isImportSpecifier()) {
     const parent = binding.path.parent as types.ImportDeclaration
+    const dirname = Path.dirname(config.filePath)
+    filePath = resolveModule(dirname, parent.source.value)
+    const imported = binding.path.get('imported')
+    key = imported.isStringLiteral()
+      ? imported.node.value
+      : imported.isIdentifier()
+        ? imported.node.name
+        : ''
+  }
 
-    const filePath = Path.join(config.filePath, parent.source.value)
+  if (filePath && key) {
+
     const code = readFile(filePath)
     const ast = parseString(code, config.compilerConfig)
 
@@ -285,14 +294,7 @@ const getJSXIdentifierType = (
       filePath
     })
 
-    const imported = binding.path.get('imported')
-    const importedName = imported.isStringLiteral()
-      ? imported.node.value
-      : imported.isIdentifier()
-        ? imported.node.name
-        : ''
-
-    return analyzerResult.exports?.[importedName] ?? null
+    return analyzerResult.exports?.[key] ?? null
   }
 
   return null

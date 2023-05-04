@@ -101,6 +101,13 @@ const getRJTTypeFromIdentifier = (path: NodePath<types.Identifier>): RJTComponen
 }
 
 const getRJTTypeFromImportSpecifier = (path: NodePath<types.ImportSpecifier>): RJTType | null => {
+  const parent = path.parent as types.ImportDeclaration
+  const source = parent.source.value
+
+  if (source != "@react-json-templates/core") {
+    return null
+  }
+
   const imported = path.get('imported')
 
   if (!imported.isIdentifier()) {
