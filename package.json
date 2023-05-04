@@ -1,12 +1,9 @@
 {
   "name": "react-json-templates",
   "description": "react-json-templates",
-  "main": "index.js",
   "license": "MIT",
   "private": true,
   "scripts": {
-    "lint": "eslint packages --fix",
-    "test": "jest",
     "core": "yarn workspace @react-json-templates/core",
     "cli": "yarn workspace @react-json-templates/cli",
     "compiler": "yarn workspace @react-json-templates/compiler"
@@ -22,9 +19,11 @@
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-n": "^15.0.0",
     "eslint-plugin-promise": "^6.0.0",
-    "eslint-plugin-react": "^7.32.2",
     "jest": "^29.5.0",
+    "lerna": "^6.6.1",
+    "nx": "^16.0.3",
     "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.1",
     "typescript": "^5.0.4"
   }
 }

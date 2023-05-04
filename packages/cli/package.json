@@ -1,6 +1,6 @@
 {
   "name": "@react-json-templates/cli",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "bin": {
@@ -8,6 +8,8 @@
   },
   "license": "MIT",
   "scripts": {
+    "lint": "eslint .",
+    "test": "jest",
     "build": "rm -rf ./dist && tsc"
   },
   "dependencies": {
