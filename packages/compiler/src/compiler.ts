@@ -8,11 +8,7 @@ import UnusedVarsPlugin from 'babel-plugin-remove-unused-vars'
 import { getIdentifierPossibleTypes } from './typeUtils'
 import Path from 'path'
 import { analyze } from './analyser'
-import resolve from 'enhanced-resolve'
-
-const resolveModule = resolve.create.sync({
-  extensions: ['.tsx', '.jsx', 'ts', 'js']
-})
+import { resolveFromSpecifier } from './resolver'
 
 interface Config {
   filePath: string
@@ -255,47 +251,41 @@ const getJSXIdentifierType = (
     }
   }
 
-  let filePath: string | false = false
-  let key: string | null = null
+  const resolverResult = resolveFromSpecifier(
+    Path.dirname(config.filePath),
+    binding.path
+  )
 
-  if (binding.path.parentPath?.isImportDeclaration() === true) {
-    const parent = binding.path.parent as types.ImportDeclaration
-    const dirname = Path.dirname(config.filePath)
-    filePath = resolveModule(dirname, parent.source.value)
-    key = 'default'
-
-    if (filePath !== false && isTemplatePath(filePath)) {
-      return 'Template'
-    }
+  if (resolverResult == null) {
+    return null
   }
 
-  if (binding.path.isImportSpecifier()) {
-    const parent = binding.path.parent as types.ImportDeclaration
-    const dirname = Path.dirname(config.filePath)
-    filePath = resolveModule(dirname, parent.source.value)
-    const imported = binding.path.get('imported')
-    key = imported.isStringLiteral()
-      ? imported.node.value
-      : imported.isIdentifier()
-        ? imported.node.name
-        : ''
-  }
+  const { imported, modulePath } = resolverResult
 
-  if (filePath !== false && key != null) {
-    const code = readFile(filePath)
-    const ast = parseString(code, config.compilerConfig)
-
-    const analyzerResult = analyze({
-      cache: config.cache,
-      ast,
+  if (modulePath == null) {
+    throw new ParseError(config.filePath, {
       code,
-      filePath
+      start: path.node.loc?.start,
+      end: path.node.loc?.end,
+      message: 'unable to resolve module'
     })
-
-    return analyzerResult.exports?.[key] ?? null
   }
 
-  return null
+  if (isTemplatePath(modulePath)) {
+    return 'Template'
+  }
+
+  const moduleCode = readFile(modulePath)
+  const ast = parseString(moduleCode, config.compilerConfig)
+
+  const analyzerResult = analyze({
+    cache: config.cache,
+    ast,
+    code: moduleCode,
+    filePath: modulePath
+  })
+
+  return analyzerResult.exports?.[imported] ?? null
 }
 
 const buildProps = (

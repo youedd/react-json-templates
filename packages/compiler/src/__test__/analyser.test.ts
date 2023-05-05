@@ -143,21 +143,7 @@ describe('analyzer', () => {
     it('should detect default Serializable exports', () => {
       assert(
         `
-        import {Serializable as Serializable} from 'react-json-templates'
-  
-        export default Serializable("s1",() => null);
-        `,
-        {
-          type: 'Exports',
-          exports: {
-            default: { type: 'Serializable', name: 's1' }
-          }
-        }
-      )
-
-      assert(
-        `
-        import {Serializable as _Serializable} from 'react-json-templates'
+        import {Serializable as _Serializable} from '@react-json-templates/core'
   
         export default _Serializable("s1", () => null);
         `,
@@ -173,7 +159,7 @@ describe('analyzer', () => {
     it('should detect default variables export type', () => {
       assert(
         `
-        import {Serializable} from 'react-json-templates'
+        import {Serializable} from '@react-json-templates/core'
       
         const variable = Serializable("s1", () => null)
     
@@ -189,7 +175,7 @@ describe('analyzer', () => {
 
       assert(
         `
-        import {Serializable} from 'react-json-templates'
+        import {Serializable} from '@react-json-templates/core'
       
         let variable = () => null
   
@@ -209,7 +195,7 @@ describe('analyzer', () => {
     it('should not detect default variables export with conditional type', () => {
       assert(
         `
-        import {Serializable} from 'react-json-templates'
+        import {Serializable} from '@react-json-templates/core'
       
         let variable = Serializable("s1", () => null)
   
@@ -229,7 +215,7 @@ describe('analyzer', () => {
 
       assert(
         `
-        import {Template, Serializable} from 'react-json-templates'
+        import {Template, Serializable} from '@react-json-templates/core'
       
         let variable = Serializable("s1", () => null)
   
@@ -247,7 +233,7 @@ describe('analyzer', () => {
 
       assert(
         `
-        import {Serializable} from 'react-json-templates'
+        import {Serializable} from '@react-json-templates/core'
       
         let variable = () => null
   
@@ -265,7 +251,7 @@ describe('analyzer', () => {
 
       assert(
         `
-        import {Serializable} from 'react-json-templates'
+        import {Serializable} from '@react-json-templates/core'
       
         let variable = cond
           ? Serializable("s1", () => null)
@@ -319,7 +305,7 @@ describe('analyzer', () => {
     it('should detect named Serializable exports', () => {
       assert(
         `
-        import {Serializable} from 'react-json-templates'
+        import {Serializable} from '@react-json-templates/core'
       
         export const s1 = Serializable("s1", () => null)
         `,
@@ -333,7 +319,7 @@ describe('analyzer', () => {
 
       assert(
         `
-        import {Serializable} from 'react-json-templates'
+        import {Serializable} from '@react-json-templates/core'
       
         const s1 = Serializable("s1", () => null)
   
@@ -349,7 +335,7 @@ describe('analyzer', () => {
 
       assert(
         `
-        import {Serializable} from 'react-json-templates'
+        import {Serializable} from '@react-json-templates/core'
       
         const _s1 = Serializable("s1", () => null)
   
@@ -367,7 +353,7 @@ describe('analyzer', () => {
     it('should detect named variables export type', () => {
       assert(
         `
-        import {Serializable} from 'react-json-templates'
+        import {Serializable} from '@react-json-templates/core'
       
         const variable = Serializable("s1", () => null)
     
@@ -383,7 +369,7 @@ describe('analyzer', () => {
 
       assert(
         `
-        import {Serializable} from 'react-json-templates'
+        import {Serializable} from '@react-json-templates/core'
       
         let variable = Serializable("_s1", () => null)
   
@@ -401,7 +387,7 @@ describe('analyzer', () => {
 
       assert(
         `
-        import {Serializable} from 'react-json-templates'
+        import {Serializable} from '@react-json-templates/core'
       
         let variable = () => null
   
@@ -419,7 +405,7 @@ describe('analyzer', () => {
 
       assert(
         `
-        import {Serializable} from 'react-json-templates'
+        import {Serializable} from '@react-json-templates/core'
       
         let variable = () => null
   
@@ -441,7 +427,7 @@ describe('analyzer', () => {
     it('should not detect named variables export with conditional type', () => {
       assert(
         `
-        import {Serializable} from 'react-json-templates'
+        import {Serializable} from '@react-json-templates/core'
       
         const variable = Serializable("s1", () => null)
   
@@ -461,7 +447,7 @@ describe('analyzer', () => {
 
       assert(
         `
-        import {Serializable} from 'react-json-templates'
+        import {Serializable} from '@react-json-templates/core'
       
         const variable = Serializable("s1", () => null)
   
@@ -479,7 +465,7 @@ describe('analyzer', () => {
 
       assert(
         `
-        import {Serializable} from 'react-json-templates'
+        import {Serializable} from '@react-json-templates/core'
       
         let variable = () => null
   
@@ -497,7 +483,7 @@ describe('analyzer', () => {
 
       assert(
         `
-        import {Serializable} from 'react-json-templates'
+        import {Serializable} from '@react-json-templates/core'
       
         let variable =  () => null
         
@@ -515,7 +501,7 @@ describe('analyzer', () => {
 
       assert(
         `
-        import {Template, Serializable} from 'react-json-templates'
+        import {Template, Serializable} from '@react-json-templates/core'
       
         export const n1 = cond
           ? Serializable("s1", () => null)
@@ -529,7 +515,7 @@ describe('analyzer', () => {
 
       assert(
         `
-        import {Template, Serializable} from 'react-json-templates'
+        import {Template, Serializable} from '@react-json-templates/core'
       
         export let variable = Serializable("s1", () => null)
         
@@ -547,7 +533,7 @@ describe('analyzer', () => {
     it('should detect multiple export types', () => {
       assert(
         `
-        import {Serializable} from 'react-json-templates'
+        import {Serializable} from '@react-json-templates/core'
   
         export const s1 = Serializable("s1", () => null)
   

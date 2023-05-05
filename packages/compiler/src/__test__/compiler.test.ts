@@ -1,9 +1,10 @@
 import fs from 'fs'
 import { compile } from '../compiler'
-import { type RJTCompilerCache, type RJTCompilerConfig } from '../types'
+import type { RJTCompilerCache, RJTCompilerConfig } from '../types'
+import * as Resolver from '../resolver'
 
 const S = `
-import {Serializable} from "react-json-template"
+import {Serializable} from "@react-json-templates/core"
 
 export const S2 = Serializable("S2", () => null)
 
@@ -16,17 +17,30 @@ const compilerConfig: RJTCompilerConfig = {
 }
 
 const _compile = (code: string, cache: RJTCompilerCache = {}): string => {
+  jest.spyOn(Resolver, 'resolve').mockImplementation((_, module) => {
+    if (module === './S') {
+      return './S.tsx'
+    }
+
+    if (module === './T.rjt') {
+      return './T.rjt'
+    }
+
+    return ''
+  })
+
   jest.spyOn(fs, 'readFileSync').mockImplementation((path) => {
     if (path === 'filePath') {
       return code
     }
 
-    if (path === 'filePath/S') {
+    if (path === './S.tsx') {
       return S
     }
 
     return ''
   })
+
   return compile({ filePath: 'filePath', compilerConfig, cache })
 }
 
