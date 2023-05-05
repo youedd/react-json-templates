@@ -38,30 +38,32 @@ export type RJT_OPERAND_TYPE = number | RJT_CONSTANT<'number'> | RJT_GENERIC_OPE
 export type RJT_GENERIC_OPERATION =
   { type: '__RJT_OPERATION__' }
   &
-  {
-    operation: '+'
-    operands: [RJT_OPERAND_TYPE, RJT_OPERAND_TYPE]
-  }
-  | {
-    operation: '*'
-    operands: [RJT_OPERAND_TYPE, RJT_OPERAND_TYPE]
-  }
-  | {
-    operation: '-'
-    operands: [RJT_OPERAND_TYPE, RJT_OPERAND_TYPE]
-  }
-  | {
-    operation: '/'
-    operands: [RJT_OPERAND_TYPE, RJT_OPERAND_TYPE]
-  }
-  | {
-    operation: 'sqrt'
-    operands: [RJT_OPERAND_TYPE]
-  }
-  | {
-    operation: 'pow'
-    operands: [RJT_OPERAND_TYPE, RJT_OPERAND_TYPE]
-  }
+  (
+    | {
+      operation: '+'
+      operands: [RJT_OPERAND_TYPE, RJT_OPERAND_TYPE]
+    }
+    | {
+      operation: '*'
+      operands: [RJT_OPERAND_TYPE, RJT_OPERAND_TYPE]
+    }
+    | {
+      operation: '-'
+      operands: [RJT_OPERAND_TYPE, RJT_OPERAND_TYPE]
+    }
+    | {
+      operation: '/'
+      operands: [RJT_OPERAND_TYPE, RJT_OPERAND_TYPE]
+    }
+    | {
+      operation: 'sqrt'
+      operands: [RJT_OPERAND_TYPE]
+    }
+    | {
+      operation: 'pow'
+      operands: [RJT_OPERAND_TYPE, RJT_OPERAND_TYPE]
+    }
+  )
 
 export type RJT_OPERATION_TYPE = RJT_GENERIC_OPERATION['operation']
 
