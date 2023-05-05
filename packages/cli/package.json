@@ -1,6 +1,6 @@
 {
   "name": "@react-json-templates/cli",
-  "version": "0.2.0-RC.0",
+  "version": "0.2.0-RC.2",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "bin": {
@@ -13,7 +13,7 @@
     "build": "rm -rf ./dist && tsc"
   },
   "dependencies": {
-    "@react-json-templates/compiler": "^0.2.0-RC.0",
+    "@react-json-templates/compiler": "^0.2.0-RC.2",
     "commander": "^10.0.1"
   }
 }
