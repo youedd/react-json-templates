@@ -1,7 +1,7 @@
 import { Command } from 'commander'
 import pkg from './package.json'
 import { compile } from '@react-json-templates/compiler'
-import path from 'path'
+// import path from 'path'
 import fs from 'fs/promises'
 
 const CWD = process.cwd()
@@ -16,12 +16,12 @@ program
 
 program.command('compile')
   .argument('<templates...>', 'templates to compile')
-  .argument('[outDir]', 'output directory', CWD)
-  .action(async (paths: string[], outDir: string) => {
+  .option('-o,--out-dir', 'output directory', CWD)
+  .action(async (paths: string[], { outDir }: { outDir: string }) => {
     const outputs = paths
       .filter(item => item.endsWith('.rjt'))
       .map(item => ({
-        filePath: path.join(outDir, item.replace(CWD, '')),
+        filePath: item + '.tsx', // path.join(outDir, item.replace(CWD, '')),
         generated: compile({
           cache,
           filePath: item,
