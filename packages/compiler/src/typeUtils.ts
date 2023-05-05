@@ -104,7 +104,7 @@ const getRJTTypeFromImportSpecifier = (path: NodePath<types.ImportSpecifier>): R
   const parent = path.parent as types.ImportDeclaration
   const source = parent.source.value
 
-  if (source != "@react-json-templates/core") {
+  if (source !== '@react-json-templates/core') {
     return null
   }
 

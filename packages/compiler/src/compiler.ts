@@ -8,11 +8,11 @@ import UnusedVarsPlugin from 'babel-plugin-remove-unused-vars'
 import { getIdentifierPossibleTypes } from './typeUtils'
 import Path from 'path'
 import { analyze } from './analyser'
-import resolve from "enhanced-resolve"
+import resolve from 'enhanced-resolve'
 
 const resolveModule = resolve.create.sync({
-  extensions: [".tsx", ".jsx", "ts", "js"]
-});
+  extensions: ['.tsx', '.jsx', 'ts', 'js']
+})
 
 interface Config {
   filePath: string
@@ -57,35 +57,35 @@ const replaceJSX = (ast: types.File, code: string, config: Config): void => {
   traverse(
     ast,
     {
-      ExportAllDeclaration(path) {
+      ExportAllDeclaration (path) {
         throw new InvalidSyntaxError(filePath, {
           code,
           start: path.node.loc?.start,
           end: path.node.loc?.end
         })
       },
-      ExportNamedDeclaration(path) {
+      ExportNamedDeclaration (path) {
         throw new InvalidSyntaxError(filePath, {
           code,
           start: path.node.loc?.start,
           end: path.node.loc?.end
         })
       },
-      ExportDefaultDeclaration(path) {
+      ExportDefaultDeclaration (path) {
         throw new InvalidSyntaxError(filePath, {
           code,
           start: path.node.loc?.start,
           end: path.node.loc?.end
         })
       },
-      JSXAttribute(path) {
+      JSXAttribute (path) {
         const value = path.get('value')
         if (value.isJSXElement() || value.isJSXFragment()) {
           path.node.value = types.jsxExpressionContainer(value.node)
         }
       },
       JSXFragment: {
-        exit(path) {
+        exit (path) {
           path.replaceWith(
             types.objectExpression([
               types.objectProperty(
@@ -101,7 +101,7 @@ const replaceJSX = (ast: types.File, code: string, config: Config): void => {
         }
       },
       JSXElement: {
-        exit(path) {
+        exit (path) {
           const openingElement = path.get('openingElement')
           const name = openingElement.get('name')
 
@@ -255,17 +255,16 @@ const getJSXIdentifierType = (
     }
   }
 
-
   let filePath: string | false = false
   let key: string | null = null
 
-  if (binding.path.parentPath?.isImportDeclaration()) {
+  if (binding.path.parentPath?.isImportDeclaration() === true) {
     const parent = binding.path.parent as types.ImportDeclaration
     const dirname = Path.dirname(config.filePath)
     filePath = resolveModule(dirname, parent.source.value)
-    key = "default"
+    key = 'default'
 
-    if (filePath && isTemplatePath(filePath)) {
+    if (filePath !== false && isTemplatePath(filePath)) {
       return 'Template'
     }
   }
@@ -282,8 +281,7 @@ const getJSXIdentifierType = (
         : ''
   }
 
-  if (filePath && key) {
-
+  if (filePath !== false && key != null) {
     const code = readFile(filePath)
     const ast = parseString(code, config.compilerConfig)
 
