@@ -1,9 +1,9 @@
-import type { Config } from 'jest';
-import baseConfig from "../../jest.config.base"
+import type { Config } from 'jest'
+import baseConfig from '../../jest.config.base'
 
 const config: Config = {
   ...baseConfig,
-  displayName: "compiler"
-};
+  displayName: 'compiler'
+}
 
-export default config;
+export default config
