@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Inflater inflates complex Component 1`] = `
+<DocumentFragment>
+  <div
+    testid="test"
+  >
+    <button>
+       Simple 
+    </button>
+    <button>
+       Simple 
+    </button>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`Inflater inflates constants 1`] = `
+<DocumentFragment>
+  <div
+    height="1600"
+  >
+    900
+  </div>
+</DocumentFragment>
+`;
+
+exports[`Inflater inflates fragment 1`] = `
+<DocumentFragment>
+  <div>
+    <button>
+       Simple 
+    </button>
+    <button>
+       Simple 
+    </button>
+    <button>
+       Simple 
+    </button>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`Inflater inflates front side calculation 1`] = `
+<DocumentFragment>
+  <button
+    height="1620"
+  >
+     Simple 
+  </button>
+</DocumentFragment>
+`;
+
+exports[`Inflater inflates props Action 1`] = `
+<DocumentFragment>
+  <button>
+     Simple 
+  </button>
+</DocumentFragment>
+`;
+
+exports[`Inflater inflates simple Component 1`] = `
+<DocumentFragment>
+  <button
+    testid="test"
+  >
+     Simple 
+  </button>
+</DocumentFragment>
+`;
