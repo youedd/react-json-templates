@@ -1,5 +1,5 @@
 import { Command } from 'commander'
-import pkg from './package.json'
+import pkg from '@react-json-templates/cli/package.json'
 import { compile } from '@react-json-templates/compiler'
 // import path from 'path'
 import fs from 'fs/promises'
