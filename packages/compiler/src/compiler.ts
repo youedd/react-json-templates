@@ -30,7 +30,7 @@ export const compile = (config: Config): string => {
 }
 
 const validate = (filePath: string, ast: types.File, code: string): void => {
-  const lastExpression = ast.program.body.at(-1)
+  const lastExpression = ast.program.body[ast.program.body.length - 1]
 
   if (
     !types.isExpressionStatement(lastExpression) ||
@@ -195,7 +195,7 @@ const transform = (ast: types.File): void => {
     }
   }
 
-  const lastStatement = body.at(-1)
+  const lastStatement = body[body.length - 1]
 
   if (!types.isExpressionStatement(lastStatement)) {
     throw new InternalError("Template's last statement should be an Expression statement")
