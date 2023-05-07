@@ -1,4 +1,4 @@
-import { type FIXME, type RJT_CONSTANT_TYPE, type RJT_ACTION, type RJT_CONSTANT, type RJT_OPERATION, type RJT_OPERATION_TYPE, type RJT_COMPONENT, type RJT_PROPS, type RJT_ELEMENT, type RJT_FRAGMENT } from './types'
+import type { FIXME, RJT_CONSTANT_TYPE, RJT_ACTION, RJT_CONSTANT, RJT_OPERATION, RJT_OPERATION_TYPE, RJT_COMPONENT, RJT_PROPS, RJT_ELEMENT, RJT_FRAGMENT } from './types'
 
 export const Serializable = <T>(_name: string, Comp: T): T => Comp
 
