@@ -1,10 +1,10 @@
 {
   "name": "@react-json-templates/cli",
   "version": "0.2.0-RC.3",
-  "main": "./dist/src/index.js",
-  "types": "./dist/src/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "bin": {
-    "rjt": "./dist/src/index.js"
+    "rjt": "./dist/index.js"
   },
   "license": "MIT",
   "scripts": {
