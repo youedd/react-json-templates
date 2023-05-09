@@ -1,7 +1,5 @@
 import type { FIXME, RJT_CONSTANT_TYPE, RJT_ACTION, RJT_CONSTANT, RJT_OPERATION, RJT_OPERATION_TYPE, RJT_COMPONENT, RJT_PROPS, RJT_ELEMENT, RJT_FRAGMENT } from './types'
 
-export const Serializable = <T>(_name: string, Comp: T): T => Comp
-
 export const Component = (name: string, props: RJT_PROPS): RJT_COMPONENT => {
   return {
     type: '__RJT_COMPONENT__',
