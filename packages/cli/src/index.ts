@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { Command } from 'commander'
 import pkg from '@react-json-templates/cli/package.json'
 import { compile } from '@react-json-templates/compiler'
@@ -10,11 +12,13 @@ const cache = {}
 const program = new Command()
 
 program
-  .name('react-json-templates cli')
-  .description('CLI to compile rjt templates')
+  .name('rjt')
+  .description('react-json-templates CLI')
   .version(pkg.version)
 
-program.command('compile')
+program
+  .command('compile')
+  .description('Compile rjt templates')
   .argument('<templates...>', 'templates to compile')
   .option('-o,--out-dir', 'output directory', CWD)
   .action(async (paths: string[], { outDir }: { outDir: string }) => {
