@@ -1,6 +1,6 @@
 import { type NodePath } from '@babel/traverse'
-import type * as types from '@babel/types'
-import { type RJTComponentType, type RJTType } from './types'
+import * as types from '@babel/types'
+import { type RJTComponentType } from './types'
 
 export const getIdentifierPossibleTypes = (
   path: NodePath<types.Identifier | types.JSXIdentifier>
@@ -51,45 +51,39 @@ export const getIdentifierPossibleTypes = (
 }
 
 export const getRJTTypeFromPath = (path: NodePath<any>): RJTComponentType | null => {
-  if (path.isCallExpression()) {
-    return getRJTTypeFromCallExpression(path)
-  }
-
   if (path.isIdentifier()) {
     return getRJTTypeFromIdentifier(path)
   }
 
-  return null
+  return parseSerializable(path)
 }
 
-const getRJTTypeFromCallExpression = (path: NodePath<types.CallExpression>): RJTComponentType | null => {
-  const callee = path.get('callee')
+const parseSerializable = (path: NodePath): RJTComponentType | null => {
+  if (!path.isFunctionDeclaration() && !path.isArrowFunctionExpression()) {
+    return null
+  }
+  const body = path.node.body
 
-  if (!callee.isIdentifier()) {
+  if (!types.isBlockStatement(body)) {
     return null
   }
 
-  const name = callee.node.name
-  const binding = callee.scope.getBinding(name)
+  const serializableDirective = body.directives.find(item => item.value.value.match(/serializable .+/))?.value.value
 
-  if (binding == null || !binding?.path.isImportSpecifier()) {
+  if (serializableDirective == null) {
     return null
   }
 
-  const type = getRJTTypeFromImportSpecifier(binding?.path)
+  const name = serializableDirective.replace('serializable ', '').trim()
 
-  if (type === 'Serializable') {
-    const name = path.get('arguments')[0]
-
-    if (name?.isStringLiteral()) {
-      return {
-        type,
-        name: name.node.value
-      }
-    }
+  if (name === '') {
+    return null
   }
 
-  return null
+  return {
+    type: 'Serializable',
+    name
+  }
 }
 
 const getRJTTypeFromIdentifier = (path: NodePath<types.Identifier>): RJTComponentType | null => {
@@ -97,25 +91,6 @@ const getRJTTypeFromIdentifier = (path: NodePath<types.Identifier>): RJTComponen
 
   return possibleTypes.length === 1
     ? possibleTypes[0]
-    : null
-}
-
-const getRJTTypeFromImportSpecifier = (path: NodePath<types.ImportSpecifier>): RJTType | null => {
-  const parent = path.parent as types.ImportDeclaration
-  const source = parent.source.value
-
-  if (source !== '@react-json-templates/core') {
-    return null
-  }
-
-  const imported = path.get('imported')
-
-  if (!imported.isIdentifier()) {
-    return null
-  }
-
-  return ['Serializable'].includes(imported.node.name)
-    ? imported.node.name as RJTType
     : null
 }
 
