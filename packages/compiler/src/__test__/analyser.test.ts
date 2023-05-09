@@ -49,71 +49,6 @@ describe('analyzer', () => {
       expect(Analyser.analyze({ filePath: 'filePath', code: '', ast: null as unknown as File, cache })).toEqual(result)
       expect(spy).not.toBeCalled()
     })
-
-    // it("should call analyzeTemplate for tsx templates files", () => {
-    //   jest.spyOn(Utils, "getHash").mockReturnValue("hash")
-
-    //   const result: RJTAnalyserResult = {
-    //     type: "Template",
-    //     exports: null
-    //   }
-    //   const cache: RJTCompilerCache = {}
-
-    //   const spy = jest.spyOn(TemplateAnalyser, 'analyzeTemplate').mockReturnValue(result)
-
-    //   expect(Analyser.analyze({ filePath: "filePath.rjt.tsx", code: "", ast: null as unknown as File, cache })).toEqual(result)
-    //   expect(spy).toBeCalled()
-    //   expect(cache.hash).toBe(result)
-    // })
-
-    // it("should call analyzeTemplate for jsx templates files", () => {
-    //   jest.spyOn(Utils, "getHash").mockReturnValue("hash")
-
-    //   const result: RJTAnalyserResult = {
-    //     type: "Template",
-    //     exports: null
-    //   }
-
-    //   const cache: RJTCompilerCache = {}
-
-    //   const spy = jest.spyOn(TemplateAnalyser, 'analyzeTemplate').mockReturnValue(result)
-
-    //   expect(Analyser.analyze({ filePath: "filePath.rjt.jsx", code: "", ast: null as unknown as File, cache })).toEqual(result)
-    //   expect(spy).toBeCalled()
-    //   expect(cache.hash).toBe(result)
-    // })
-
-    // it('should use cache for tsx templates files', () => {
-    //   jest.spyOn(Utils, "getHash").mockReturnValue("hash")
-
-    //   const result: RJTAnalyserResult = {
-    //     type: "Template",
-    //     exports: null
-    //   }
-
-    //   const cache: RJTCompilerCache = { hash: result }
-
-    //   const spy = jest.spyOn(TemplateAnalyser, 'analyzeTemplate')
-
-    //   expect(Analyser.analyze({ filePath: "filePath.rjt.tsx", code: "", ast: null as unknown as File, cache })).toEqual(result)
-    //   expect(spy).not.toBeCalled()
-    // })
-
-    // it('should use cache for jsx templates files', () => {
-    //   jest.spyOn(Utils, "getHash").mockReturnValue("hash")
-
-    //   const result: RJTAnalyserResult = {
-    //     type: "Template",
-    //     exports: null
-    //   }
-
-    //   const cache: RJTCompilerCache = { hash: result }
-
-    //   const spy = jest.spyOn(TemplateAnalyser, 'analyzeTemplate')
-
-    //   expect(Analyser.analyze({ filePath: "filePath.rjt.jsx", code: "", ast: null as unknown as File, cache })).toEqual(result)
-    //   expect(spy).not.toBeCalled()
-    // })
   })
 
   describe(Analyser.analyzeExports, () => {
@@ -142,10 +77,12 @@ describe('analyzer', () => {
 
     it('should detect default Serializable exports', () => {
       assert(
-        `
-        import {Serializable as _Serializable} from '@react-json-templates/core'
-  
-        export default _Serializable("s1", () => null);
+        `  
+        export default () => {
+          "serializable s1"
+
+          return null;
+        }
         `,
         {
           type: 'Exports',
@@ -158,10 +95,12 @@ describe('analyzer', () => {
 
     it('should detect default variables export type', () => {
       assert(
-        `
-        import {Serializable} from '@react-json-templates/core'
-      
-        const variable = Serializable("s1", () => null)
+        `      
+        const variable = () => {
+          "serializable s1"
+
+          return null;
+        }
     
         export default variable
         `,
@@ -174,12 +113,14 @@ describe('analyzer', () => {
       )
 
       assert(
-        `
-        import {Serializable} from '@react-json-templates/core'
-      
+        `      
         let variable = () => null
   
-        variable = Serializable("s1", () => null)
+        variable = () => {
+          "serializable s1"
+
+          return null;
+        }
     
         export default variable
         `,
@@ -195,12 +136,19 @@ describe('analyzer', () => {
     it('should not detect default variables export with conditional type', () => {
       assert(
         `
-        import {Serializable} from '@react-json-templates/core'
       
-        let variable = Serializable("s1", () => null)
+        let variable = () => {
+          "serializable s1"
+
+          return null;
+        }
   
         if(cond) {
-          variable = Serializable("s1", () => null)
+          variable = () => {
+            "serializable s1"
+  
+            return null;
+          }
         }
   
         export default variable
@@ -214,13 +162,19 @@ describe('analyzer', () => {
       )
 
       assert(
-        `
-        import {Template, Serializable} from '@react-json-templates/core'
-      
-        let variable = Serializable("s1", () => null)
+        `      
+        let variable = () => {
+          "serializable s1"
+
+          return null;
+        }
   
         if(cond) {
-          variable = Serializable("s2", () => null)
+          variable = () => {
+            "serializable s2"
+  
+            return null;
+          }
         }
   
         export default variable
@@ -232,13 +186,15 @@ describe('analyzer', () => {
       )
 
       assert(
-        `
-        import {Serializable} from '@react-json-templates/core'
-      
+        `      
         let variable = () => null
   
         if(cond) {
-          variable = Serializable("s1", () => null)
+          variable = () => {
+            "serializable s1"
+  
+            return null;
+          }
         }
     
         export default variable
@@ -251,10 +207,12 @@ describe('analyzer', () => {
 
       assert(
         `
-        import {Serializable} from '@react-json-templates/core'
-      
         let variable = cond
-          ? Serializable("s1", () => null)
+          ? () => {
+              "serializable s1"
+  
+              return null;
+            }
           : () => null
     
         export default variable
@@ -305,9 +263,11 @@ describe('analyzer', () => {
     it('should detect named Serializable exports', () => {
       assert(
         `
-        import {Serializable} from '@react-json-templates/core'
-      
-        export const s1 = Serializable("s1", () => null)
+        export const s1 = () => {
+          "serializable s1"
+
+          return null;
+        }
         `,
         {
           type: 'Exports',
@@ -318,10 +278,12 @@ describe('analyzer', () => {
       )
 
       assert(
-        `
-        import {Serializable} from '@react-json-templates/core'
-      
-        const s1 = Serializable("s1", () => null)
+        `      
+        const s1 = () => {
+          "serializable s1"
+
+          return null;
+        }
   
         export { s1 }
         `,
@@ -334,10 +296,12 @@ describe('analyzer', () => {
       )
 
       assert(
-        `
-        import {Serializable} from '@react-json-templates/core'
-      
-        const _s1 = Serializable("s1", () => null)
+        `      
+        const _s1 = () => {
+          "serializable s1"
+
+          return null;
+        }
   
         export { _s1 as s1 }
         `,
@@ -352,10 +316,12 @@ describe('analyzer', () => {
 
     it('should detect named variables export type', () => {
       assert(
-        `
-        import {Serializable} from '@react-json-templates/core'
-      
-        const variable = Serializable("s1", () => null)
+        `      
+        const variable = () => {
+          "serializable s1"
+
+          return null;
+        }
     
         export const s1 = variable
         `,
@@ -368,12 +334,18 @@ describe('analyzer', () => {
       )
 
       assert(
-        `
-        import {Serializable} from '@react-json-templates/core'
-      
-        let variable = Serializable("_s1", () => null)
+        `      
+        let variable = () => {
+          "serializable _s1"
+
+          return null;
+        }
   
-        variable = Serializable("s1", () => null)
+        variable = () => {
+          "serializable s1"
+
+          return null;
+        }
   
         export const s1 = variable
         `,
@@ -386,12 +358,14 @@ describe('analyzer', () => {
       )
 
       assert(
-        `
-        import {Serializable} from '@react-json-templates/core'
-      
+        `      
         let variable = () => null
   
-        variable = Serializable("s1", () => null)
+        variable = () => {
+          "serializable s1"
+
+          return null;
+        }
     
         export const s1 = variable
         `,
@@ -404,12 +378,14 @@ describe('analyzer', () => {
       )
 
       assert(
-        `
-        import {Serializable} from '@react-json-templates/core'
-      
+        `      
         let variable = () => null
   
-        variable = Serializable("s1", () => null)
+        variable = () => {
+          "serializable s1"
+
+          return null;
+        }
   
         const s1 = variable
   
@@ -426,13 +402,19 @@ describe('analyzer', () => {
 
     it('should not detect named variables export with conditional type', () => {
       assert(
-        `
-        import {Serializable} from '@react-json-templates/core'
-      
-        const variable = Serializable("s1", () => null)
+        `      
+        const variable = () => {
+          "serializable s1"
+
+          return null;
+        }
   
         if(cond) {
-          variable = Serializable("s1", () => null)
+          variable = () => {
+          "serializable s1"
+
+          return null;
+        }
         }
   
         export { variable as s1 }
@@ -446,13 +428,19 @@ describe('analyzer', () => {
       )
 
       assert(
-        `
-        import {Serializable} from '@react-json-templates/core'
-      
-        const variable = Serializable("s1", () => null)
+        `      
+        const variable = () => {
+          "serializable s1"
+
+          return null;
+        }
   
         if(cond) {
-          variable = Serializable("s2", () => null)
+          variable = () => {
+            "serializable s2"
+  
+            return null;
+          }
         }
   
         export { variable as s1 }
@@ -464,13 +452,15 @@ describe('analyzer', () => {
       )
 
       assert(
-        `
-        import {Serializable} from '@react-json-templates/core'
-      
+        `      
         let variable = () => null
   
         if(cond) {
-          variable = Serializable("s1", () => null)
+          variable = () => {
+            "serializable s1"
+
+            return null;
+          }
         }
     
         export { variable as n1 }
@@ -482,13 +472,15 @@ describe('analyzer', () => {
       )
 
       assert(
-        `
-        import {Serializable} from '@react-json-templates/core'
-      
+        `      
         let variable =  () => null
         
         variable = cond
-          ? Serializable("s1", () => null)
+          ? () => {
+              "serializable s1"
+
+              return null;
+            }
           : () => null
     
         export { variable as n1 }
@@ -500,11 +492,13 @@ describe('analyzer', () => {
       )
 
       assert(
-        `
-        import {Template, Serializable} from '@react-json-templates/core'
-      
+        `      
         export const n1 = cond
-          ? Serializable("s1", () => null)
+          ? () => {
+              "serializable s1"
+
+              return null;
+            }
           : () => null
         `,
         {
@@ -514,13 +508,19 @@ describe('analyzer', () => {
       )
 
       assert(
-        `
-        import {Template, Serializable} from '@react-json-templates/core'
-      
-        export let variable = Serializable("s1", () => null)
+        `      
+        export let variable = () => {
+          "serializable s1"
+
+          return null;
+        }
         
         variable = cond
-          ? Serializable("s2", () => null)
+          ? () => {
+              "serializable s2"
+    
+              return null;
+            }
           : () => null
         `,
         {
@@ -532,20 +532,30 @@ describe('analyzer', () => {
 
     it('should detect multiple export types', () => {
       assert(
-        `
-        import {Serializable} from '@react-json-templates/core'
-  
-        export const s1 = Serializable("s1", () => null)
+        `  
+        export const s1 = () => {
+          "serializable s1"
+
+          return null;
+        }
   
         const n1 = 5
   
         export const s2 = s1
   
-        export let n2 = Serializable("_s2", () => null)
+        export let n2 = () => {
+          "serializable _s2"
+
+          return null;
+        }
   
         n2 = () => null
   
-        export default Serializable("s3", () => null)
+        export default () => {
+          "serializable s3"
+
+          return null;
+        }
         `,
         {
           type: 'Exports',
@@ -558,92 +568,4 @@ describe('analyzer', () => {
       )
     })
   })
-
-  // describe(Analyser.analyzeTemplate, () => {
-  //   it("should detect valid templates", () => {
-  //     const code = `
-  //     import {S1, S2} from "../serializable"
-
-  //     const a = Math.random();
-
-  //     <S1 value={a}>
-  //       <S2 />
-  //     </S1>
-  //     `
-  //     const ast = Utils.parseString(code, config)
-  //     const result = Analyser.analyzeTemplate({
-  //       code,
-  //       ast,
-  //       filePath: "filePath",
-  //       cache: {}
-  //     })
-  //     expect(result).toEqual({ type: 'Template', exports: null })
-  //   })
-
-  //   it("should throw Syntax error if invalid template", () => {
-
-  //     const invalidCodes = [
-  //       `
-  //       import {S1, S2} from "../serializable"
-
-  //       const a = Math.random();
-  //       `,
-  //       `
-  //       import {S1, S2} from "../serializable"
-
-  //       const a = Math.random();
-
-  //       <S1 value={a}>
-  //         <S2 />
-  //       </S1>
-
-  //       const x = 5
-  //       `,
-  //       `
-  //       import {S1, S2} from "../serializable"
-
-  //       export const a = Math.random();
-
-  //       <S1 value={a}>
-  //         <S2 />
-  //       </S1>
-  //       `,
-  //       `
-  //       import {S1, S2} from "../serializable"
-
-  //       const a = Math.random();
-
-  //       export default a;
-
-  //       <S1 value={a}>
-  //         <S2 />
-  //       </S1>
-  //       `,
-  //       `
-  //       import {S1, S2} from "../serializable"
-
-  //       const a = Math.random();
-
-  //       export * from "../test";
-
-  //       <S1 value={a}>
-  //         <S2 />
-  //       </S1>
-  //       `
-  //     ]
-
-  //     invalidCodes.forEach((code) => {
-  //       const ast = Utils.parseString(code, config)
-  //       expect(() => {
-  //         Analyser.analyzeTemplate({
-  //           filePath: 'filPath',
-  //           code,
-  //           ast,
-  //           cache: {}
-  //         })
-  //       })
-  //         .toThrow("invalid syntax")
-  //     })
-  //   })
-  // })
 })
