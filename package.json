@@ -8,6 +8,8 @@
     "core": "yarn workspace @react-json-templates/core",
     "cli": "yarn workspace @react-json-templates/cli",
     "compiler": "yarn workspace @react-json-templates/compiler",
+    "lint:all": "nx run-many -t lint",
+    "test:all": "nx run-many -t test",
     "publish:all": "nx run-many -t build && lerna publish"
   },
   "workspaces": [
