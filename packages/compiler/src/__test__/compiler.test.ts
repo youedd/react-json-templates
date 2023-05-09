@@ -4,11 +4,15 @@ import type { RJTCompilerCache, RJTCompilerConfig } from '../types'
 import * as Resolver from '../resolver'
 
 const S = `
-import {Serializable} from "@react-json-templates/core"
+export const S2 = () => {
+  "serializable S2"
+  return null
+}
 
-export const S2 = Serializable("S2", () => null)
-
-export default Serializable("S1", () => null)
+export default () => {
+  "serializable S1"
+  return null
+}
 `
 
 const compilerConfig: RJTCompilerConfig = {
