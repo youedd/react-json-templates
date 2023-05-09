@@ -3,14 +3,20 @@
  */
 
 import { render } from '@testing-library/react'
-import { Serializable } from '@react-json-templates/core'
 import { RJTProvider, type RJT_CONFIG } from '../RJTProvider'
 import { Inflater, mapData } from '../Inflater'
 
 const config: RJT_CONFIG = {
   components: {
-    Simple: Serializable('Simple', (props: any) => <button {...props} > Simple </button>),
-    Complex: Serializable('Complex', (props: any) => <div {...props} />)
+    Simple: (props: any) => {
+      'serializable Simple'
+      return <button {...props} > Simple </button>
+    },
+    Complex: (props: any) => {
+      'serializable Complex'
+
+      return <div {...props} />
+    }
   },
   actions: {
     handlePress: jest.fn(),
