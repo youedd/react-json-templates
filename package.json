@@ -7,7 +7,8 @@
     "prepare": "husky install",
     "core": "yarn workspace @react-json-templates/core",
     "cli": "yarn workspace @react-json-templates/cli",
-    "compiler": "yarn workspace @react-json-templates/compiler"
+    "compiler": "yarn workspace @react-json-templates/compiler",
+    "publish:all": "nx run-many -t build && lerna publish"
   },
   "workspaces": [
     "packages/*"
