@@ -25,7 +25,7 @@ program
     const outputs = paths
       .filter(item => item.endsWith('.rjt'))
       .map(item => ({
-        filePath: item.replace(/.\rjt$/, 'generated.tsx'), // path.join(outDir, item.replace(CWD, '')),
+        filePath: item.replace(/\.rjt$/, 'generated.tsx'), // path.join(outDir, item.replace(CWD, '')),
         generated: compile({
           cache,
           filePath: item,
