@@ -1,6 +1,6 @@
 {
   "name": "@react-json-templates/inflater",
-  "version": "0.2.0-RC.8",
+  "version": "0.2.0-RC.9",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "MIT",
@@ -10,7 +10,7 @@
     "build": "rm -rf ./dist && tsc"
   },
   "dependencies": {
-    "@react-json-templates/core": "^0.2.0-RC.8"
+    "@react-json-templates/core": "^0.2.0-RC.9"
   },
   "devDependencies": {
     "@testing-library/react": "^14.0.0",
