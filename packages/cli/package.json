@@ -9,8 +9,10 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint .",
+    "tslint": "tsc --noEmit",
     "test": "echo to do",
-    "build": "rm -rf ./dist && tsc"
+    "build": "rm -rf ./dist && tsc",
+    "prepack": "nx run build"
   },
   "dependencies": {
     "@react-json-templates/compiler": "^0.2.0-RC.10",

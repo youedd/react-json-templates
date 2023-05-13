@@ -17,6 +17,27 @@
   "targetDefaults": {
     "build": {
       "dependsOn": [
+        "tslint",
+        "lint",
+        "test",
+        "^build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ]
+    },
+    "tslint": {
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ]
+    },
+    "test": {
+      "dependsOn": [
         "^build"
       ],
       "inputs": [

@@ -28,5 +28,3 @@ jobs:
         cache: 'yarn'
     - run: yarn install --frozen-lockfile
     - run: npx nx run-many -t build
-    - run: npx nx run-many -t lint
-    - run: npx nx run-many -t test
