@@ -1,4 +1,4 @@
-import type { FIXME, RJT_CONSTANT_TYPE, RJT_ACTION, RJT_CONSTANT, RJT_OPERATION, RJT_OPERATION_TYPE, RJT_COMPONENT, RJT_PROPS, RJT_ELEMENT, RJT_FRAGMENT } from './types'
+import type { RJT_CONSTANT_TYPE, RJT_ACTION, RJT_CONSTANT, RJT_OPERATION, RJT_OPERATION_TYPE, RJT_COMPONENT, RJT_PROPS, RJT_ELEMENT, RJT_FRAGMENT, RJT_DATA, FIXME } from './types'
 
 export const Component = (name: string, props: RJT_PROPS): RJT_COMPONENT => {
   return {
@@ -15,7 +15,7 @@ export const Fragment = (children: RJT_ELEMENT[]): RJT_FRAGMENT => {
   }
 }
 
-export const Action = (name: string, ...params: unknown[]): RJT_ACTION => {
+export const Action = (name: string, ...params: RJT_DATA[]): RJT_ACTION => {
   return {
     type: '__RJT_ACTION__',
     name,
