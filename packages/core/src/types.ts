@@ -1,18 +1,18 @@
 
 export type FIXME = any
 
-export interface RJT_COMPONENT {
+export type RJT_COMPONENT = {
   type: '__RJT_COMPONENT__'
   name: string
   props: RJT_PROPS
 }
 
-export interface RJT_FRAGMENT {
+export type RJT_FRAGMENT = {
   type: '__RJT_FRAGMENT__'
   children: RJT_ELEMENT[]
 }
 
-export interface RJT_ACTION {
+export type RJT_ACTION = {
   type: '__RJT_ACTION__'
   name: string
   params: RJT_DATA[]
@@ -24,7 +24,7 @@ export type RJT_CONSTANT_TYPE =
   | 'object'
   | 'array'
 
-export interface RJT_CONSTANT<T extends RJT_CONSTANT_TYPE = RJT_CONSTANT_TYPE> {
+export type RJT_CONSTANT<T extends RJT_CONSTANT_TYPE = RJT_CONSTANT_TYPE> = {
   type: '__RJT_CONSTANT__'
   name: string
   kind: T
