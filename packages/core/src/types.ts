@@ -4,7 +4,7 @@ export type FIXME = any
 export interface RJT_COMPONENT {
   type: '__RJT_COMPONENT__'
   name: string
-  props: Record<string, unknown>
+  props: RJT_PROPS
 }
 
 export interface RJT_FRAGMENT {
@@ -27,6 +27,8 @@ export interface RJT_CONSTANT<T extends RJT_CONSTANT_TYPE = RJT_CONSTANT_TYPE> {
 }
 
 export type RJT_ELEMENT =
+  | undefined
+  | null
   | string
   | RJT_COMPONENT
   | RJT_FRAGMENT
@@ -71,6 +73,7 @@ type FindByOperation<Union, Type> = Union extends { operation: Type } ? Union : 
 export type RJT_OPERATION<Type extends RJT_OPERATION_TYPE> = FindByOperation<RJT_GENERIC_OPERATION, Type>
 
 export type RJT_PROP =
+  | null
   | string
   | number
   | boolean
