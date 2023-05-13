@@ -1,6 +1,6 @@
 {
   "name": "@react-json-templates/core",
-  "version": "0.2.0-RC.12",
+  "version": "0.2.0-RC.13",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "MIT",
