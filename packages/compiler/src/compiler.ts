@@ -1,35 +1,19 @@
-import { InternalError, InvalidSyntaxError, ParseError } from './errors'
-import type { RJTCompilerConfig, RJTCompilerCache, RJTComponentType } from './types'
-import { isTemplatePath, parseFile, parseString, readFile } from './utils'
+import { InternalError, InvalidSyntaxError } from './errors'
+import type { RJTCompilerConfig } from './types'
+import { parseFile } from './utils'
 import traverse, { type NodePath } from '@babel/traverse'
 import generate from '@babel/generator'
 import * as types from '@babel/types'
-import UnusedVarsPlugin from 'babel-plugin-remove-unused-vars'
-import { getIdentifierPossibleTypes } from './typeUtils'
-import Path from 'path'
-import { analyze } from './analyser'
-import { resolveFromSpecifier } from './resolver'
 
 interface Config {
   filePath: string
   compilerConfig: RJTCompilerConfig
-  cache: RJTCompilerCache
 }
 
 export const compile = (config: Config): string => {
   const { filePath, compilerConfig } = config
   const { ast, code } = parseFile(filePath, compilerConfig)
 
-  validate(filePath, ast, code)
-  replaceJSX(ast, code, config)
-  transform(ast)
-
-  const newCode = generate(ast).code
-
-  return `// @ts-nocheck \n\n ${newCode}`
-}
-
-const validate = (filePath: string, ast: types.File, code: string): void => {
   const lastExpression = ast.program.body[ast.program.body.length - 1]
 
   if (
@@ -45,14 +29,26 @@ const validate = (filePath: string, ast: types.File, code: string): void => {
       end: lastExpression?.loc?.end
     })
   }
-}
-
-const replaceJSX = (ast: types.File, code: string, config: Config): void => {
-  const { filePath } = config
 
   traverse(
     ast,
     {
+      ImportNamespaceSpecifier (path) {
+        if (path.node.local.name !== 'RJT') {
+          return
+        }
+
+        const parent = path.parent as types.ImportDeclaration
+        if (parent.source.value !== '@react-json-templates/core') {
+          return
+        }
+
+        if (parent.specifiers.length === 1) {
+          path.parentPath.remove()
+        } else {
+          path.remove()
+        }
+      },
       ExportAllDeclaration (path) {
         throw new InvalidSyntaxError(filePath, {
           code,
@@ -82,17 +78,16 @@ const replaceJSX = (ast: types.File, code: string, config: Config): void => {
       },
       JSXFragment: {
         exit (path) {
+          const children = types.arrayExpression(buildChildren(path))
+
           path.replaceWith(
-            types.objectExpression([
-              types.objectProperty(
-                types.identifier('type'),
-                types.stringLiteral('__RJT_FRAGMENT__')
+            types.callExpression(
+              types.memberExpression(
+                types.identifier('RJT'),
+                types.identifier('Fragment')
               ),
-              types.objectProperty(
-                types.identifier('children'),
-                types.arrayExpression(types.react.buildChildren(path.node) as types.Expression[])
-              )
-            ])
+              [children]
+            )
           )
         }
       },
@@ -114,26 +109,11 @@ const replaceJSX = (ast: types.File, code: string, config: Config): void => {
           }
 
           const tagName = name.node.name
-          const componentType = getJSXIdentifierType(name, code, config)
+          const isTemplate = path.scope.getBinding(tagName) != null
 
-          if (componentType === null) {
-            throw new ParseError(
-              filePath,
-              {
-                code,
-                start: openingElement.node.name.loc?.start,
-                end: openingElement.node.name.loc?.end,
-                message: 'JSX element is neither a Template nor a Serializable.'
-              }
-            )
-          }
+          const props = buildProps(path)
 
-          const props = buildProps(
-            openingElement.node.attributes,
-            path.node
-          )
-
-          if (componentType === 'Template') {
+          if (isTemplate) {
             path.replaceWith(
               types.callExpression(
                 types.identifier(tagName),
@@ -142,34 +122,40 @@ const replaceJSX = (ast: types.File, code: string, config: Config): void => {
             )
             return
           }
-
-          if (componentType.type === 'Serializable') {
-            path.replaceWith(
-              types.objectExpression([
-                types.objectProperty(
-                  types.identifier('type'),
-                  types.stringLiteral('__RJT_COMPONENT__')
-                ),
-                types.objectProperty(
-                  types.identifier('name'),
-                  types.stringLiteral(componentType.name)
-                ),
-                types.objectProperty(
-                  types.identifier('props'),
-                  props
-                )
-              ])
+          path.replaceWith(
+            types.callExpression(
+              types.memberExpression(
+                types.identifier('RJT'),
+                types.identifier('Component')
+              ),
+              [types.stringLiteral(tagName), props]
             )
-          }
+          )
         }
       }
     }
   )
+
+  addBuildersImport(ast)
+  addDefaultExport(ast)
+
+  return generate(ast).code
 }
 
-const transform = (ast: types.File): void => {
+const addBuildersImport = (ast: types.File): void => {
+  const builderImport = types.importDeclaration(
+    [types.importNamespaceSpecifier(types.identifier('RJT'))],
+    types.stringLiteral('@react-json-templates/core')
+  )
+
+  ast.program.body.unshift(builderImport)
+}
+
+const addDefaultExport = (ast: types.File): void => {
   let lastImportIndex = -1
   let lastTypeDeclarationIndex = -1
+
+  let shouldTypeProps = false
 
   const body = ast.program.body
 
@@ -192,6 +178,7 @@ const transform = (ast: types.File): void => {
       lastTypeDeclarationIndex++
     } else if (types.isTSTypeAliasDeclaration(node) || types.isTSInterfaceDeclaration(node)) {
       move(i, ++lastTypeDeclarationIndex)
+      shouldTypeProps = shouldTypeProps || node.id.name === 'Props'
     }
   }
 
@@ -207,10 +194,16 @@ const transform = (ast: types.File): void => {
     throw new InternalError('Last statement should be an Expression')
   }
 
+  const props = types.identifier('props')
+  if (shouldTypeProps) {
+    props.typeAnnotation = types.tsTypeAnnotation(
+      types.tsTypeReference(types.identifier('Props'))
+    )
+  }
   const defaultExport = types.exportDefaultDeclaration(
     types.functionDeclaration(
       null,
-      [types.identifier('props')],
+      [props],
       types.blockStatement([
         ...body.slice(lastTypeDeclarationIndex + 1, -1),
         types.returnStatement(lastStatementExpression)
@@ -221,84 +214,22 @@ const transform = (ast: types.File): void => {
   )
 
   body.splice(lastTypeDeclarationIndex + 1, body.length - lastTypeDeclarationIndex, defaultExport)
-
-  const visitor = UnusedVarsPlugin({ types, traverse }).visitor
-
-  traverse(ast, visitor)
 }
 
-const getJSXIdentifierType = (
-  path: NodePath<types.JSXIdentifier>,
-  code: string,
-  config: Config
-): 'Template' | RJTComponentType | null => {
-  const binding = path.scope.getBinding(path.node.name)
-
-  if (binding == null) {
-    return null
-  }
-
-  if (binding.path.isVariableDeclarator()) {
-    const possibleTypes = getIdentifierPossibleTypes(path)
-
-    if (possibleTypes[0]?.type === 'Serializable') {
-      throw new ParseError(config.filePath, {
-        code,
-        start: path.node.loc?.start,
-        end: path.node.loc?.end,
-        message: 'Serializable should not be declared in a template file'
-      })
-    }
-  }
-
-  const resolverResult = resolveFromSpecifier(
-    Path.dirname(config.filePath),
-    binding.path
-  )
-
-  if (resolverResult == null) {
-    return null
-  }
-
-  const { imported, modulePath } = resolverResult
-
-  if (modulePath == null) {
-    throw new ParseError(config.filePath, {
-      code,
-      start: path.node.loc?.start,
-      end: path.node.loc?.end,
-      message: 'unable to resolve module'
-    })
-  }
-
-  if (isTemplatePath(modulePath)) {
-    return 'Template'
-  }
-
-  const moduleCode = readFile(modulePath)
-  const ast = parseString(moduleCode, config.compilerConfig)
-
-  const analyzerResult = analyze({
-    cache: config.cache,
-    ast,
-    code: moduleCode,
-    filePath: modulePath
-  })
-
-  return analyzerResult.exports?.[imported] ?? null
-}
-
-const buildProps = (
-  attributes?: Array<types.JSXAttribute | types.JSXSpreadAttribute>,
-  children?: types.JSXElement
-): types.ObjectExpression => {
+const buildProps = (path: NodePath<types.JSXElement | types.JSXFragment>): types.ObjectExpression => {
   const properties: Array<types.ObjectProperty | types.SpreadElement> = []
 
+  const attributes = path.isJSXElement()
+    ? path.get('openingElement').get('attributes')
+    : null
+
   if (attributes != null) {
-    const props = attributes.map((node) => {
-      if (types.isJSXSpreadAttribute(node)) {
-        return types.spreadElement(node.argument)
+    const props = attributes.map((nodePath) => {
+      if (nodePath.isJSXSpreadAttribute()) {
+        return types.spreadElement(nodePath.node.argument)
       }
+
+      const node = nodePath.node as types.JSXAttribute
 
       const propertyName = types.identifier(node.name.name as string)
 
@@ -327,14 +258,20 @@ const buildProps = (
     properties.push(...props)
   }
 
-  if (children != null) {
+  const children = buildChildren(path)
+
+  if (children.length > 0) {
     properties.push(
       types.objectProperty(
         types.identifier('children'),
-        types.arrayExpression(types.react.buildChildren(children) as types.Expression[])
+        types.arrayExpression(children)
       )
     )
   }
 
   return types.objectExpression(properties)
+}
+
+const buildChildren = (path: NodePath<types.JSXElement | types.JSXFragment>): types.Expression[] => {
+  return types.react.buildChildren(path.node) as types.Expression[]
 }

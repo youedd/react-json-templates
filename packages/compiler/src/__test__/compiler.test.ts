@@ -1,51 +1,22 @@
 import fs from 'fs'
 import { compile } from '../compiler'
-import type { RJTCompilerCache, RJTCompilerConfig } from '../types'
-import * as Resolver from '../resolver'
-
-const S = `
-export const S2 = () => {
-  "serializable S2"
-  return null
-}
-
-export default () => {
-  "serializable S1"
-  return null
-}
-`
+import type { RJTCompilerConfig } from '../types'
 
 const compilerConfig: RJTCompilerConfig = {
   sourceType: 'module',
   plugins: ['jsx', 'typescript']
 }
 
-const _compile = (code: string, cache: RJTCompilerCache = {}): string => {
-  jest.spyOn(Resolver, 'resolve').mockImplementation((_, module) => {
-    if (module === './S') {
-      return './S.tsx'
-    }
-
-    if (module === './T.rjt') {
-      return './T.rjt'
-    }
-
-    return ''
-  })
-
+const _compile = (code: string): string => {
   jest.spyOn(fs, 'readFileSync').mockImplementation((path) => {
     if (path === 'filePath') {
       return code
     }
 
-    if (path === './S.tsx') {
-      return S
-    }
-
     return ''
   })
 
-  return compile({ filePath: 'filePath', compilerConfig, cache })
+  return compile({ filePath: 'filePath', compilerConfig })
 }
 
 describe('compiler', () => {
@@ -55,8 +26,6 @@ describe('compiler', () => {
 
   it('should throw Invalid syntax error if last statement is not JSX expression', () => {
     const code = `
-    import {Repeat} from "./Repeat"
-
     const x = 5;
 
     <Repeat count={x}>
@@ -66,13 +35,11 @@ describe('compiler', () => {
     const y = ""
     `
 
-    expect(() => _compile(code)).toThrow('invalid syntax')
+    expect(() => _compile(code)).toThrow('Invalid syntax')
   })
 
   it('should throw Invalid syntax error if export ExportNamedDeclaration found', () => {
     const code = `
-    import {Repeat} from "./Repeat"
-
     export const x = 5;
 
     <Repeat count={x}>
@@ -80,14 +47,13 @@ describe('compiler', () => {
     </Repeat>
     `
 
-    expect(() => _compile(code)).toThrow('invalid syntax')
+    expect(() => _compile(code)).toThrow('Invalid syntax')
   })
 
   it('should throw Invalid syntax error if export ExportAllDeclaration found', () => {
     const code = `
-    import {Repeat} from "./Repeat"
     export * from "./exports"
-
+    
     const x = 5;
 
     <Repeat count={x}>
@@ -95,14 +61,11 @@ describe('compiler', () => {
     </Repeat>
     `
 
-    expect(() => _compile(code)).toThrow('invalid syntax')
+    expect(() => _compile(code)).toThrow('Invalid syntax')
   })
 
   it('should throw Invalid syntax error if export ExportDefaultDeclaration found', () => {
-    const code = `
-    import {Repeat} from "./Repeat"
-    export * from "./exports"
-    
+    const code = `    
     const x = 5;
 
     export default x;
@@ -112,13 +75,11 @@ describe('compiler', () => {
     </Repeat>
     `
 
-    expect(() => _compile(code)).toThrow('invalid syntax')
+    expect(() => _compile(code)).toThrow('Invalid syntax')
   })
 
   it('should compile simple template', () => {
-    const code = `
-    import S1, {S2} from "./S"
-  
+    const code = `  
     type X = number
   
     const x : X = 5;
@@ -131,13 +92,28 @@ describe('compiler', () => {
     expect(_compile(code)).toMatchSnapshot()
   })
 
-  it('should compile template with unordered imports and types', () => {
+  it('should compile template with nested templates', () => {
     const code = `
+    import T1 from "./T"
     
     type X = number
     const x : X = 5;
+  
+    interface Y { foo: string}
+    const y = { foo: "bar" };
+      
+    <T1 x={x} y={y} s={<S1 x={x} />} />
+    `
+
+    expect(_compile(code)).toMatchSnapshot()
+  })
+
+  it('should compile template with unordered imports and types', () => {
+    const code = `
+    type X = number
+    const x : X = 5;
     
-    import T1 from "./T.rjt"
+    import T1 from "./T"
 
     interface Y { foo: string}
     const y = { foo: "bar" };
@@ -149,9 +125,7 @@ describe('compiler', () => {
   })
 
   it('should compile template with fragment', () => {
-    const code = `
-    import S1, {S2} from "./S"
-    
+    const code = `    
     type X = number
     const x : X = 5;
   
@@ -167,27 +141,9 @@ describe('compiler', () => {
     expect(_compile(code)).toMatchSnapshot()
   })
 
-  it('should compile template with nested templates', () => {
-    const code = `
-    import T1 from "./T.rjt"
-    import S1 from "./S"
-    
-    type X = number
-    const x : X = 5;
-  
-    interface Y { foo: string}
-    const y = { foo: "bar" };
-      
-    <T1 x={x} y={y} s={<S1 x={x} />} />
-    `
-
-    expect(_compile(code)).toMatchSnapshot()
-  })
-
   it('should compile template with string literals ', () => {
     const code = `
-    import T1 from "./T.rjt"
-    import S1 from "./S"
+    import T1 from "./T"
 
     <T1>
       Test
@@ -200,8 +156,7 @@ describe('compiler', () => {
 
   it('should compile template with js code ', () => {
     const code = `
-    import T1 from "./T.rjt"
-    import S1 from "./S"
+    import T1 from "./T"
 
     <T1>
       <S1 x={0} />

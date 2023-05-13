@@ -1,32 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`compiler should compile simple template 1`] = `
-"// @ts-nocheck 
-
- type X = number;
+"import * as RJT from "@react-json-templates/core";
+type X = number;
 export default async function (props) {
   const x: X = 5;
-  return {
-    type: "__RJT_COMPONENT__",
-    name: "S1",
-    props: {
-      children: [{
-        type: "__RJT_COMPONENT__",
-        name: "S2",
-        props: {
-          x: x,
-          children: []
-        }
-      }]
-    }
-  };
+  return RJT.Component("S1", {
+    children: [RJT.Component("S2", {
+      x: x
+    })]
+  });
 }"
 `;
 
 exports[`compiler should compile template with fragment 1`] = `
-"// @ts-nocheck 
-
- type X = number;
+"import * as RJT from "@react-json-templates/core";
+type X = number;
 interface Y {
   foo: string;
 }
@@ -35,56 +24,31 @@ export default async function (props) {
   const y = {
     foo: "bar"
   };
-  return {
-    type: "__RJT_FRAGMENT__",
-    children: [{
-      type: "__RJT_COMPONENT__",
-      name: "S1",
-      props: {
-        x: x,
-        children: []
-      }
-    }, {
-      type: "__RJT_COMPONENT__",
-      name: "S2",
-      props: {
-        y: y,
-        children: []
-      }
-    }]
-  };
+  return RJT.Fragment([RJT.Component("S1", {
+    x: x
+  }), RJT.Component("S2", {
+    y: y
+  })]);
 }"
 `;
 
 exports[`compiler should compile template with js code  1`] = `
-"// @ts-nocheck 
-
- import T1 from "./T.rjt";
+"import * as RJT from "@react-json-templates/core";
+import T1 from "./T";
 export default async function (props) {
   return T1({
-    children: [{
-      type: "__RJT_COMPONENT__",
-      name: "S1",
-      props: {
-        x: 0,
-        children: []
-      }
-    }, [1, 2, 3].map(item => ({
-      type: "__RJT_COMPONENT__",
-      name: "S1",
-      props: {
-        x: item,
-        children: []
-      }
+    children: [RJT.Component("S1", {
+      x: 0
+    }), [1, 2, 3].map(item => RJT.Component("S1", {
+      x: item
     }))]
   });
 }"
 `;
 
 exports[`compiler should compile template with nested templates 1`] = `
-"// @ts-nocheck 
-
- import T1 from "./T.rjt";
+"import * as RJT from "@react-json-templates/core";
+import T1 from "./T";
 type X = number;
 interface Y {
   foo: string;
@@ -97,53 +61,38 @@ export default async function (props) {
   return T1({
     x: x,
     y: y,
-    s: {
-      type: "__RJT_COMPONENT__",
-      name: "S1",
-      props: {
-        x: x,
-        children: []
-      }
-    },
-    children: []
+    s: RJT.Component("S1", {
+      x: x
+    })
   });
 }"
 `;
 
 exports[`compiler should compile template with string literals  1`] = `
-"// @ts-nocheck 
-
- import T1 from "./T.rjt";
+"import * as RJT from "@react-json-templates/core";
+import T1 from "./T";
 export default async function (props) {
   return T1({
-    children: ["Test", {
-      type: "__RJT_COMPONENT__",
-      name: "S1",
-      props: {
-        children: []
-      }
-    }]
+    children: ["Test", RJT.Component("S1", {})]
   });
 }"
 `;
 
 exports[`compiler should compile template with unordered imports and types 1`] = `
-"// @ts-nocheck 
-
- import T1 from "./T.rjt";
+"import * as RJT from "@react-json-templates/core";
+import T1 from "./T";
 type X = number;
 interface Y {
   foo: string;
 }
-export default async function () {
+export default async function (props) {
   const x: X = 5;
   const y = {
     foo: "bar"
   };
   return T1({
     x: x,
-    y: y,
-    children: []
+    y: y
   });
 }"
 `;

@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@react-json-templates/compiler": "^0.2.0-RC.10",
-    "commander": "^10.0.1"
+    "commander": "^10.0.1",
+    "glob": "^10.2.3"
   }
 }

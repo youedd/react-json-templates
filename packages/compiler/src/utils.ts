@@ -1,5 +1,4 @@
 import { readFileSync } from 'fs'
-import { createHash } from 'crypto'
 import { parse } from '@babel/parser'
 import { type File } from '@babel/types'
 import { type RJTCompilerConfig } from './types'
@@ -33,19 +32,4 @@ export const parseString = (source: string, config: RJTCompilerConfig): File => 
  */
 export const readFile = (path: string): string => {
   return readFileSync(path).toString()
-}
-
-/**
- * Returns a sha1 hash of the given string
- * @param str
- * @returns hash
- */
-export const getHash = (str: string): string => {
-  const shasum = createHash('sha1')
-  shasum.update(str)
-  return shasum.digest('hex')
-}
-
-export const isTemplatePath = (path: string): boolean => {
-  return path.endsWith('.rjt')
 }
