@@ -1,6 +1,6 @@
 {
   "name": "@react-json-templates/cli",
-  "version": "0.2.0-RC.10",
+  "version": "0.2.0-RC.11",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
@@ -15,7 +15,7 @@
     "prepack": "nx run build"
   },
   "dependencies": {
-    "@react-json-templates/compiler": "^0.2.0-RC.10",
+    "@react-json-templates/compiler": "^0.2.0-RC.11",
     "commander": "^10.0.1",
     "glob": "^10.2.3"
   }

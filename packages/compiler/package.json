@@ -1,6 +1,6 @@
 {
   "name": "@react-json-templates/compiler",
-  "version": "0.2.0-RC.10",
+  "version": "0.2.0-RC.11",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "MIT",
